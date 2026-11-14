@@ -8,8 +8,9 @@ const out=path.resolve('artifacts/weather');fs.mkdirSync(out,{recursive:true});
  try{for(const mobile of [false,true]){
   const ctx=await browser.newContext(mobile?devices['iPhone 14']:{viewport:{width:1440,height:1000}}),page=await ctx.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('503'))errors.push(m.text());});
-  await page.route('**/api/space-weather**',r=>r.fulfill({json:[]}));await page.route('https://api.nasa.gov/**',r=>r.fulfill({json:[],headers:{'access-control-allow-origin':'*'}}));
+  page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('503')&&!m.text().includes('429'))errors.push(m.text());});
+  let donkiCalls=0; const limited=r=>{donkiCalls++;return r.fulfill({status:429,json:{},headers:{'access-control-allow-origin':'*','retry-after':'1800'}});};
+  await page.route('**/api/space-weather**',limited);await page.route('https://api.nasa.gov/**',limited);
   let catalogCalls=0;
   await page.route('**/meda/catalog.json*',async r=>{catalogCalls++;if(catalogCalls===1)await r.fulfill({status:503,body:'Test failure'});else await r.continue();});
   await page.goto(process.env.URL||'http://127.0.0.1:4175/?q=low');
@@ -44,9 +45,13 @@ const out=path.resolve('artifacts/weather');fs.mkdirSync(out,{recursive:true});
   // The original mineral dialog remains usable after the weather drawer closes.
   await page.locator('#btn-mineral-science').click();assert(await page.locator('#mineral-science-title').isVisible());assert(!await page.locator('#modal').evaluate(el=>el.classList.contains('weather-modal')));await page.keyboard.press('Escape');
   if(mobile)await page.locator('#btn-layers').click();
-  await page.evaluate(()=>window.solAtlas.enterSite());await idle('site');if(mobile)await page.locator('#btn-layers').click();
+  await page.evaluate(()=>window.solAtlas.enterSite());await idle('site');if(mobile)await page.locator('#btn-info').click();
+  assert((await page.locator('.sw').textContent()).includes('Solar activity advisory temporarily unavailable'));
+  assert(!(await page.locator('.sw').textContent()).includes('429'));
+  await page.locator('#btn-donki-retry').click();await page.waitForFunction(()=>solAtlas.spaceWeather?.ok===false);assert.equal(donkiCalls,1);
+  await page.screenshot({path:path.join(out,`planner-weather-${mobile?'mobile':'desktop'}.png`)});
   const verdict=await page.evaluate(()=>solAtlas.planner.result.verdict.lvl);
-  await page.locator('#btn-weather').click();await page.waitForFunction(()=>!document.querySelector('.weather-data').hidden);assert.equal(await page.locator('.weather-intelligence').count(),1);
+  await page.locator('#btn-planner-weather').click();await page.waitForFunction(()=>!document.querySelector('.weather-data').hidden);assert.equal(await page.locator('.weather-intelligence').count(),1);
   await page.keyboard.press('Escape');assert.equal(await page.evaluate(()=>solAtlas.planner.result.verdict.lvl),verdict);assert(await page.locator('.journal-toggle').isVisible());
   assert.deepEqual(errors,[]);console.log(`PASS ${mobile?'mobile':'desktop'}: lazy load, failure/retry, archived sols, detectors, chart, missing wind, keyboard/focus, no overflow, unchanged simulation, Mineral Science, Journal, no console errors`);
   await ctx.close();

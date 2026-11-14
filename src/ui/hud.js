@@ -10,7 +10,7 @@ import { evaDoseMSv, RAD_MSV_PER_DAY } from '../terrain/eva.js';
 import { url as dataUrl } from '../core/assets.js';
 import { Recorder } from './recorder.js';
 import { FEATURES } from '../config.js';
-import { describeSpaceWeather } from '../lib/spaceweather.js';
+import { describeSpaceWeather, fetchSpaceWeather } from '../lib/spaceweather.js';
 import { openMineralScience } from './mineralScience.js';
 import { openWeatherIntelligence } from './weatherIntelligence.js';
 
@@ -281,7 +281,7 @@ export class Hud {
       <span class="k">Solar longitude</span><span class="v">${mt.Ls.toFixed(1)}° · ${season(mt.Ls)}</span>
       <span class="k">Earth–Mars range</span><span class="v">${fmtNum(light.km / 1e6, 1)} M km</span>
       <span class="k">One-way signal</span><span class="v">${(light.seconds / 60).toFixed(1)} min</span>
-      <span class="k">Space weather at Mars</span><span class="v sw-${sw.lvl}" title="${sw.long}">${sw.short}</span>`;
+      <span class="k">Solar advisory · DONKI</span><span class="v sw-${sw.lvl}" title="${sw.long}">${sw.short}</span>`;
   }
 
   /** The live DONKI check finished (or failed): refresh the panels that show it. */
@@ -294,8 +294,8 @@ export class Hud {
     const sw = describeSpaceWeather(this.app.spaceWeather);
     const ic = sw.lvl === 'ok' ? ICON.ok : sw.lvl === 'warn' ? ICON.warn : '·';
     const src = this.app.spaceWeather?.ok ? `${this.app.spaceWeather.source}, WSA-ENLIL model (NASA GSFC CCMC), live` : 'NASA DONKI, WSA-ENLIL model (NASA GSFC CCMC)';
-    return `<div class="sw sw-${sw.lvl}"><div class="sw-h"><span>${ic}</span>SPACE WEATHER AT MARS</div><div>${sw.long}${sw.lvl === 'warn' ? ' Keep the EVA inside the storm-shelter time, or move it.' : ''}</div>
-      <div class="sw-src">${src}${sw.link ? ` · <a href="${sw.link}" target="_blank" rel="noopener">forecast</a>` : ''} · advisory, not part of the verdict</div></div>`;
+    return `<div class="sw sw-${sw.lvl}"><div class="sw-h"><span>${ic}</span>SPACE WEATHER — NASA DONKI</div><div class="sw-src">Solar activity advisory · independent of MEDA surface measurements</div><div>${sw.long}${sw.lvl === 'warn' ? ' Keep the EVA inside the storm-shelter time, or move it.' : ''}</div>
+      <div class="sw-src">${src}${sw.link ? ` · <a href="${sw.link}" target="_blank" rel="noopener">forecast</a>` : ''} · advisory, not part of the verdict</div>${sw.lvl === 'off' ? '<button class="btn small" id="btn-donki-retry">CHECK ADVISORY AGAIN</button>' : ''}</div>`;
   }
 
   orbitLegend(layer) {
@@ -331,7 +331,7 @@ export class Hud {
         <div class="sec-h">Data layers <span class="tag">${site ? 'HiRISE ZONE' : 'CTX CRATER'}</span></div>
         ${rows}
         <button class="row" id="btn-mineral-science" aria-haspopup="dialog" aria-controls="modal"><span class="ic">${ICON.book}</span><span><div class="nm">Mineral Science</div><div class="ds">Jezero research · no map overlay</div></span></button>
-        <button class="row" id="btn-weather" aria-haspopup="dialog" aria-controls="modal"><span class="ic">${ICON.book}</span><span><div class="nm">Jezero Weather</div><div class="ds">Archived MEDA observations · not live</div></span></button>
+        <button class="row" id="btn-weather" aria-haspopup="dialog" aria-controls="modal"><span class="ic">${ICON.book}</span><span><div class="nm">JEZERO WEATHER · MEDA</div><div class="ds">Archived rover observations · not live</div></span></button>
         <div id="t-legend"></div>
       </div>
       <div class="sec">
@@ -503,6 +503,7 @@ export class Hud {
     this.left.innerHTML = `
       <div class="sec">
         <div class="sec-h">Marswalk planner <span class="tag">EV1 · ${pl.params.rover ? 'ROVER' : 'ON FOOT'}</span></div>
+        <button class="btn planner-weather" id="btn-planner-weather" aria-haspopup="dialog" aria-controls="modal">JEZERO WEATHER · MEDA<small>Archived rover observations · Sols 70–71 · not live</small></button>
         <div class="ctl goal"><label for="p-goal">Mission goal</label><select id="p-goal">${MISSION_GOALS.map((g) => `<option value="${g.id}" ${g.id === pl.goal ? 'selected' : ''}>${g.name}</option>`).join('')}</select></div>
         <div class="assump">${(MISSION_GOALS.find((g) => g.id === pl.goal) || MISSION_GOALS[0]).why}</div>
         <div id="wps">${wps}</div>
@@ -530,6 +531,11 @@ export class Hud {
       </div>`;
     this.left.querySelectorAll('[data-rm]').forEach((b) => { b.onclick = () => pl.remove(+b.dataset.rm); });
     this.left.querySelectorAll('[data-photo]').forEach((b) => { b.onclick = () => this.openPhoto(pl.waypoints[+b.dataset.photo].poi.id); });
+    $('btn-planner-weather').onclick = (e) => openWeatherIntelligence(this.app, e.currentTarget);
+    if ($('btn-donki-retry')) $('btn-donki-retry').onclick = async () => {
+      this.app.spaceWeather = null; this.spaceWeatherChanged();
+      this.app.spaceWeather = await fetchSpaceWeather(); this.spaceWeatherChanged();
+    };
     $('b-add').onclick = () => { pl.addMode = !pl.addMode; this.renderPlanner(pl); if (pl.addMode) this.closeSheet(); };
     $('b-sim').onclick = () => { this.closeSheet(); pl.sim ? pl.stopSim() : pl.startSim(); };
     $('b-plan').onclick = () => this.app.resetPlan();

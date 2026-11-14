@@ -11,6 +11,8 @@
 
 const CACHE_KEY = 'sol-atlas-donki';
 const CACHE_MS = 30 * 60 * 1000;
+const FAILURE_KEY = `${CACHE_KEY}-failure`;
+let failure = null, pending = null;
 const H = 3600 * 1000;
 
 const day = (t) => new Date(t).toISOString().slice(0, 10);
@@ -50,13 +52,28 @@ async function getJSON(u, ms = 9000) {
   const t = setTimeout(() => ctl.abort(), ms);
   try {
     const r = await fetch(u, { signal: ctl.signal });
-    if (!r.ok || !(r.headers.get('content-type') || '').includes('json')) throw new Error(`HTTP ${r.status}`);
+    if (!r.ok || !(r.headers.get('content-type') || '').includes('json')) {
+      const error = new Error(`HTTP ${r.status}`);
+      error.status = r.status;
+      const retry = r.headers.get('retry-after');
+      error.retryMs = retry ? (/^\d+$/.test(retry) ? Number(retry) * 1000 : Math.max(0, Date.parse(retry) - Date.now())) : 0;
+      throw error;
+    }
     return await r.json();
   } finally { clearTimeout(t); }
 }
 
 /** { ok, source, summary } or { ok: false, error }. Never throws. */
 export async function fetchSpaceWeather() {
+  if (pending) return pending;
+  pending = requestSpaceWeather();
+  try { return await pending; } finally { pending = null; }
+}
+
+async function requestSpaceWeather() {
+  try { failure ||= JSON.parse(sessionStorage.getItem(FAILURE_KEY) || 'null'); } catch { /* storage blocked */ }
+  if (failure?.retryAt > Date.now()) return failure;
+
   const c = readCache();
   if (c) return { ok: true, source: c.source, summary: summariseEnlil(c.sims) };
   const end = Date.now(), start = end - 30 * 24 * H;
@@ -66,16 +83,24 @@ export async function fetchSpaceWeather() {
     ...(local ? [] : [['NASA DONKI via Aero Atlas', `api/space-weather?${q}`]]),
     ['NASA DONKI · api.nasa.gov', `https://api.nasa.gov/DONKI/WSAEnlilSimulations?${q}&api_key=DEMO_KEY`],
   ];
-  let error = 'offline';
+  let error = 'offline', rateLimited = false, retryMs = 60000;
   for (const [source, u] of tries) {
     try {
       const sims = await getJSON(u);
       if (!Array.isArray(sims)) throw new Error('unexpected reply');
       try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), source, sims })); } catch { /* storage full or blocked */ }
+      failure = null;
+      try { sessionStorage.removeItem(FAILURE_KEY); } catch { /* storage blocked */ }
       return { ok: true, source, summary: summariseEnlil(sims) };
-    } catch (e) { error = e.name === 'AbortError' ? 'timed out' : e instanceof TypeError ? 'offline' : e.message; }
+    } catch (e) {
+      error = e.name === 'AbortError' ? 'timed out' : e instanceof TypeError ? 'offline' : e.message;
+      console.debug('[NASA DONKI]', error);
+      if (e.status === 429) { rateLimited = true; retryMs = Math.max(CACHE_MS, e.retryMs || 0); break; }
+    }
   }
-  return { ok: false, error };
+  failure = { ok: false, error, rateLimited, retryAt: Date.now() + retryMs };
+  try { sessionStorage.setItem(FAILURE_KEY, JSON.stringify(failure)); } catch { /* storage blocked */ }
+  return failure;
 }
 
 const fmtUTC = (t) => {
@@ -87,7 +112,7 @@ const fmtDay = (t) => { const d = new Date(t); return `${d.getUTCDate()} ${d.toL
 /** Short state for the orbit clock and the planner: { lvl: 'ok'|'warn'|'off'|'wait', short, long, link } */
 export function describeSpaceWeather(sw, now = Date.now()) {
   if (!sw) return { lvl: 'wait', short: 'checking…', long: 'Checking NASA DONKI for solar storms heading to Mars…' };
-  if (!sw.ok) return { lvl: 'off', short: 'not checked', long: `Not checked (${sw.error}). Before egress, check NASA's DONKI space-weather forecasts for CMEs heading to Mars.` };
+  if (!sw.ok) return { lvl: 'off', short: 'unavailable', long: `Solar activity advisory temporarily unavailable. ${sw.rateLimited ? 'NASA DONKI request rate-limited. Check again later.' : 'NASA DONKI could not be reached. Check again later.'} Solar conditions are unknown; this advisory is excluded from the EVA verdict.` };
   const { window, total } = sw.summary;
   if (!window.length) return { lvl: 'ok', short: 'no CME due', long: `No CME forecast to reach Mars in the next 3 days. NASA's model forecast ${total} reaching Mars in the last 30 days.` };
   const c = window.find((x) => x.arrival >= now) || window[window.length - 1];

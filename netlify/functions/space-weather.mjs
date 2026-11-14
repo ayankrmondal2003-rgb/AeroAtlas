@@ -12,9 +12,11 @@ export default async () => {
   const u = `https://api.nasa.gov/DONKI/WSAEnlilSimulations?startDate=${day(start)}&endDate=${day(end)}&api_key=${key}`;
   try {
     const r = await fetch(u, { signal: AbortSignal.timeout(9000) });
+    if (r.status === 429) return Response.json({ error: 'NASA DONKI rate-limited' }, { status: 429, headers: { 'Retry-After': r.headers.get('retry-after') || '1800', 'Cache-Control': 'public, max-age=60', 'Netlify-CDN-Cache-Control': 'public, s-maxage=60' } });
     if (!r.ok) throw new Error(`NASA API answered ${r.status}`);
     const sims = await r.json();
-    return Response.json(Array.isArray(sims) ? sims : [], {
+    if (!Array.isArray(sims)) throw new Error('Unexpected NASA DONKI response');
+    return Response.json(sims, {
       headers: {
         'Cache-Control': 'public, max-age=600',
         'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=1800, stale-while-revalidate=3600',

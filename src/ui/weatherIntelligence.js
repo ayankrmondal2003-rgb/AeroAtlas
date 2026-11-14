@@ -24,8 +24,8 @@ export function openWeatherIntelligence(app,opener){
   const modal=document.getElementById('modal'),body=document.getElementById('modal-body'),close=document.getElementById('modal-x');
   modal.classList.add('weather-modal');modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','weather-title');modal.hidden=false;
   body.innerHTML=`<section class="weather-intelligence">
-    <h2 id="weather-title">WEATHER INTELLIGENCE</h2><p class="weather-badge">JEZERO · ARCHIVED MEDA · NOT LIVE</p>
-    <p>Perseverance rover observations. Independent of the simulated EVA and its clock.</p>
+    <h2 id="weather-title">JEZERO WEATHER — NASA MEDA</h2><p class="weather-badge">JEZERO · ARCHIVED MEDA · NOT LIVE</p>
+    <p>Archived rover observations · surface environmental measurements. Independent of the simulated EVA and its clock.</p>
     <div class="weather-status" role="status" aria-live="polite">Loading local archive…</div>
     <button class="btn weather-retry" hidden>RETRY WEATHER DATA</button>
     <div class="weather-data" hidden>

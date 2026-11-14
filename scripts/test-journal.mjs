@@ -10,7 +10,7 @@ const recorder=()=>{let i=0;const r=new MissionRecorder({id:()=>String(++i)});r.
 test('only supplied actual positions count, never planned geometry or stationary samples',()=>{const r=recorder();r.ingest(sample(),10);assert.equal(r.mission.distance,0);assert.equal(points(r.mission).length,1);r.end();assert.equal(summary(r.mission).distance,0);});
 test('distance and weighted energy use simulated intervals',()=>{const r=recorder();r.ingest(sample(.001,'a',.59,100),2);r.ingest(sample(.003,'a',.58,300),6);r.end();const s=summary(r.mission);assert.equal(s.distance,3);assert.equal(s.energyJ,2000);assert.equal(s.averageW,250);assert.equal(s.duration,8);assert(Math.abs(s.oxygenConsumed-.02)<1e-10);});
 test('pause excludes recording duration and resume creates separate segment',()=>{const r=recorder();r.ingest(sample(.001),1);r.pause();r.ingest(sample(1),10);assert.equal(r.mission.elapsed,1);r.resume();r.ingest(sample(1),1);r.ingest(sample(1.001),1);r.end();assert.equal(r.mission.segments.length,2);assert(Math.abs(r.mission.distance-2)<1e-8);assert.equal(r.mission.elapsed,3);assert.equal(r.mission.clockMs,base+13000);});
-test('teleports and source resets cannot create distance or comparable oxygen',()=>{const r=recorder();r.ingest(sample(1),1);r.ingest(sample(1.001,'b'),1);r.end();assert.equal(r.mission.distance,0);assert.equal(r.mission.segments.length,3);assert.equal(summary(r.mission).oxygenConsumed,null);});
+test('teleports and source resets cannot create distance or comparable oxygen',()=>{const r=recorder();r.ingest(sample(1),1);r.ingest(sample(1.001,'b'),1);r.end();assert.equal(r.mission.distance,0);assert.equal(r.mission.segments.length,3);assert.equal(summary(r.mission).oxygenConsumed,0);assert.equal(summary(r.mission).oxygenPartial,true);});
 test('small final movements survive flush',()=>{const r=recorder();r.ingest(sample(.0002),.5);r.pause();assert.equal(points(r.mission).at(-1).x,.0002);});
 test('all note categories, edit, delete, blank and inactive guards',()=>{const r=recorder();for(const c of CATEGORIES)r.note(c,'<script>literal user text</script>');assert.equal(r.mission.entries.length,5);const id=r.mission.entries[0].id;r.note('General','edited',id);assert.equal(r.mission.entries[0].text,'edited');r.deleteNote(id);assert.equal(r.mission.entries.length,4);assert.throws(()=>r.note('General','  '));r.end();assert.throws(()=>r.note('General','closed'));});
 test('mission IDs differ; active session cannot be overwritten',()=>{const r=recorder();assert.throws(()=>r.start(base,sample(),terrain,[]));const id=r.mission.id;r.end();r.start(base,sample(),terrain,[]);assert.notEqual(r.mission.id,id);});
@@ -21,3 +21,43 @@ test('wrapping preserves every character including long words',()=>{const text='
 test('storage unavailable reports failure',async()=>{await assert.rejects(new MissionStore(null).list(),/unavailable/);});
 test('transaction request success is not commit; abort must reject',async()=>{const s=new MissionStore();let tx;const request={};s.db={transaction:()=>tx={objectStore:()=>({put:()=>request}),error:Error('Quota exceeded')}};const promise=s.save({id:'x'});await Promise.resolve();request.result='x';request.onsuccess();tx.onabort();await assert.rejects(promise,/Quota/);});
 test('save resolves only on transaction completion',async()=>{const s=new MissionStore();let tx;const request={};s.db={transaction:()=>tx={objectStore:()=>({put:()=>request})}};let done=false;const promise=s.save({id:'x'}).then(()=>done=true);await Promise.resolve();request.onsuccess();await Promise.resolve();assert.equal(done,false);tx.oncomplete();await promise;assert.equal(done,true);});
+
+
+test('recording and notes work without crypto.randomUUID', async()=>{
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
+  const realCrypto = globalThis.crypto;
+  try {
+    Object.defineProperty(globalThis, 'crypto', { configurable:true, value:{getRandomValues:realCrypto.getRandomValues.bind(realCrypto)} });
+    const r = new MissionRecorder();
+    r.start(base,sample(),terrain,[]);
+    assert.equal(r.mission.status,'Recording');
+    assert.match(r.mission.id,/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
+    r.note('General','Fallback recording');
+    assert.notEqual(r.mission.entries[0].id,r.mission.id);
+    r.pause();r.resume();r.end();
+    const id=r.mission.id;r.start(base,sample(),terrain,[]);assert.notEqual(r.mission.id,id);
+  } finally { Object.defineProperty(globalThis,'crypto',descriptor); }
+});
+test('local record IDs also work when crypto is entirely absent', async()=>{
+  const {createRecordId}=await import('../src/journal/model.js');
+  const ids=new Set(Array.from({length:1000},()=>createRecordId(null)));
+  assert.equal(ids.size,1000);
+});
+
+
+test('oxygen consumption survives session changes but excludes refill jumps',()=>{
+ const m={entries:[],telemetry:[
+ {epoch:'a',capacity:.6,oxygen:.6},{epoch:'a',capacity:.6,oxygen:.57},
+ {epoch:'b',capacity:.6,oxygen:.6},{epoch:'b',capacity:.6,oxygen:.58}]};
+ assert(Math.abs(summary(m).oxygenConsumed-.05)<1e-10);
+ assert.equal(summary(m).oxygenPartial,true);
+ assert.equal(summary(m).oxygenRemaining,.58);
+});
+test('missing oxygen and changed capacity are never bridged',()=>{
+ const m={entries:[],telemetry:[
+ {epoch:'a',capacity:.6,oxygen:.6},{epoch:'a',capacity:.6,oxygen:.59},
+ {epoch:'a',capacity:.6,oxygen:null},{epoch:'a',capacity:.6,oxygen:.5},
+ {epoch:'a',capacity:1,oxygen:.9},{epoch:'a',capacity:1,oxygen:.88}]};
+ assert(Math.abs(summary(m).oxygenConsumed-.03)<1e-10);
+ assert.equal(summary(m).oxygenPartial,true);
+});

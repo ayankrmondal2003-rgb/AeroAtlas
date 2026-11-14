@@ -82,7 +82,7 @@ export async function renderReport(mission, { loadImage = image, makeCanvas = ()
     text(c,`JEZERO CRATER  /  ${mission.status.toUpperCase()}  /  PAGE ${page+1} OF ${chunks.length}`,720,48,18,colors.cyan);
     text(c,`Mission ${mission.id}`,720,80,16,colors.muted);
     text(c,`START  Sol ${mission.start.sol} · ${mission.start.lmst} LMST     END  ${mission.end ? `Sol ${mission.end.sol} · ${mission.end.lmst} LMST` : 'Not finalized'}`,40,117,17,colors.muted);
-    const values=[['RECORDED DISTANCE',fmt(stats.distance,' m')],['RECORDED DURATION',fmt(stats.duration/60,' min')],['O₂ CONSUMED',fmt(stats.oxygenConsumed,' kg',3)],['O₂ REMAINING',fmt(stats.oxygenRemaining,' kg',3)],['MEAN METABOLIC POWER',fmt(stats.averageW,' W')],['METABOLIC ENERGY',fmt(stats.energyJ===null?null:stats.energyJ/1000,' kJ')],['FIELD NOTES',String(stats.notes)],['MOVEMENT TIME',fmt(stats.movementDuration/60,' min')]];
+    const values=[['RECORDED DISTANCE',fmt(stats.distance,' m')],['RECORDED DURATION',fmt(stats.duration/60,' min')],['O₂ CONSUMED',fmt(stats.oxygenConsumed,' kg',3) + (stats.oxygenPartial && stats.oxygenConsumed !== null ? ' *' : '')],['O₂ REMAINING',fmt(stats.oxygenRemaining,' kg',3)],['MEAN METABOLIC POWER',fmt(stats.averageW,' W')],['METABOLIC ENERGY',fmt(stats.energyJ===null?null:stats.energyJ/1000,' kJ')],['FIELD NOTES',String(stats.notes)],['MOVEMENT TIME',fmt(stats.movementDuration/60,' min')]];
     values.forEach(([label,value],i)=>{const x=40+(i%4)*384,y=142+Math.floor(i/4)*82;card(c,x,y,372,70);text(c,label,x+16,y+23,13,colors.gold);text(c,value,x+16,y+53,25,colors.cyan,600);});
     text(c,`START ${coordinates(route[0])}     END ${coordinates(route.at(-1))}`,40,326,16);
     drawMap(c,mission,im,40,346,1000,536);
@@ -91,7 +91,7 @@ export async function renderReport(mission, { loadImage = image, makeCanvas = ()
     text(c,'FIELD JOURNAL',1082,378,20,colors.gold,700);
     if(e) {text(c,`${e.category.toUpperCase()}${chunk.continued?' · CONTINUED':''}`,1082,414,17,colors.cyan,700);text(c,`Sol ${e.sol} · ${e.lmst} LMST · +${fmt(e.elapsed,' s')}`,1082,443,16,colors.muted);text(c,coordinates(e.position),1082,470,15,colors.muted);}
     chunk.lines.forEach((line,i)=>text(c,line,1082,505+i*23,18));
-    text(c,`Time-weighted power covers ${fmt(stats.powerSeconds,' s')} of recorded simulation. Oxygen comparisons require one unchanged suit session.`,40,911,15,colors.muted);
+    text(c,`Time-weighted power covers ${fmt(stats.powerSeconds,' s')} of recorded simulation. ${stats.oxygenPartial ? '* O₂: partial coverage; resets and missing readings excluded.' : 'O₂: measured from recorded suit readings.'}`,40,911,15,colors.muted);
     text(c,'Terrain: NASA/JPL/University of Arizona · MRO HiRISE mosaic and DTM, Jezero landing site (local app dataset).',40,939,15,colors.muted);
     text(c,'Simulated EVA mission — not real astronaut telemetry.',40,968,17,colors.gold);
     text(c,`Earth export time: ${earthTime}`,1030,968,14,colors.muted);

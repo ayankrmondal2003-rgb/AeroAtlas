@@ -122,7 +122,7 @@ export class Journal {
   }
   renderSelection() {
     const m=this.history.get(this.selected);const s=m?summary(m):null;
-    this.el.querySelector('.journal-history-summary').textContent=m?`${m.status} · ${m.id.slice(0,8)}\n${fmt(s.distance,' m')} · ${fmt(s.duration,' s')}\nO₂ used ${fmt(s.oxygenConsumed,' kg',3)} · left ${fmt(s.oxygenRemaining,' kg',3)}\nPower ${fmt(s.averageW,' W')} · energy ${fmt(s.energyJ===null?null:s.energyJ/1000,' kJ')}\n${this.app.mode==='site'?'Red actual / cyan saved plan':'Enter Marswalk zone to view the 3D route; report remains available.'}`:'';
+    this.el.querySelector('.journal-history-summary').textContent=m?`${m.status} · ${m.id.slice(0,8)}\n${fmt(s.distance,' m')} · ${fmt(s.duration,' s')}\nO₂ used ${fmt(s.oxygenConsumed,' kg',3)}${s.oxygenPartial && s.oxygenConsumed !== null ? ' (partial coverage)' : ''} · left ${fmt(s.oxygenRemaining,' kg',3)}\nPower ${fmt(s.averageW,' W')} · energy ${fmt(s.energyJ===null?null:s.energyJ/1000,' kJ')}\n${this.app.mode==='site'?'Red actual / cyan saved plan':'Enter Marswalk zone to view the 3D route; report remains available.'}`:'';
     this.el.querySelector('[data-action="recover"]').hidden=!(m?.status==='Interrupted'&&!m.finalized);
     for(const action of ['replay','export'])this.el.querySelector(`[data-action="${action}"]`).disabled=!m;
     const slider=this.el.querySelector('.journal-replay');slider.max=Math.max(0,points(m).length-1);slider.value=slider.max;slider.disabled=!points(m).length;

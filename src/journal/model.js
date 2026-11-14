@@ -8,17 +8,41 @@ export function stamp(ms, elapsed = 0) {
 const valid = n => typeof n === 'number' && Number.isFinite(n);
 export const points = m => (m?.segments || []).flatMap(s => s.points);
 export function summary(m) {
-  const first = m.telemetry?.[0], last = m.telemetry?.at(-1);
-  const comparable = first && last && m.telemetry.every(t => t.epoch === first.epoch && t.capacity === first.capacity);
-  const oxygen = comparable && valid(first.oxygen) && valid(last.oxygen) && first.oxygen >= last.oxygen;
+  const last = m.telemetry?.at(-1);
+  let consumed = 0, comparablePairs = 0, skippedPairs = 0;
+  const telemetry = m.telemetry || [];
+  for (let i = 1; i < telemetry.length; i++) {
+    const a = telemetry[i - 1], b = telemetry[i];
+    if (a.epoch === b.epoch && a.capacity === b.capacity &&
+        valid(a.oxygen) && valid(b.oxygen) && a.oxygen >= b.oxygen) {
+      consumed += a.oxygen - b.oxygen;
+      comparablePairs++;
+    } else skippedPairs++;
+  }
   return { distance: m.distance || 0, duration: m.elapsed || 0, movementDuration: m.movementDuration || 0,
-    oxygenConsumed: oxygen ? first.oxygen - last.oxygen : null,
+    oxygenConsumed: comparablePairs ? consumed : null,
+    oxygenPartial: skippedPairs > 0,
     oxygenRemaining: valid(last?.oxygen) ? last.oxygen : null,
     averageW: m.powerSeconds > 0 ? m.energyJ / m.powerSeconds : null,
     energyJ: m.powerSeconds > 0 ? m.energyJ : null, powerSeconds: m.powerSeconds || 0, notes: m.entries.length };
 }
+// randomUUID is unavailable on some browsers and plain HTTP origins.
+// These identifiers are local record keys, never authentication tokens.
+let localIdSequence = 0;
+export function createRecordId(cryptoApi = globalThis.crypto) {
+  if (typeof cryptoApi?.randomUUID === 'function') return cryptoApi.randomUUID();
+  if (typeof cryptoApi?.getRandomValues === 'function') {
+    const bytes = cryptoApi.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 15) | 64;
+    bytes[8] = (bytes[8] & 63) | 128;
+    const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+  }
+  return `local-${Date.now().toString(36)}-${++localIdSequence}-${Math.random().toString(36).slice(2)}`;
+}
+
 export class MissionRecorder {
-  constructor({ id = () => crypto.randomUUID(), changed = () => {} } = {}) { this.id = id; this.changed = changed; this.mission = null; this.last = null; }
+  constructor({ id = createRecordId, changed = () => {} } = {}) { this.id = id; this.changed = changed; this.mission = null; this.last = null; }
   start(ms, sample, terrain, planned) {
     if (active(this.mission) || (this.mission?.status === 'Interrupted' && !this.mission.finalized)) throw Error('Finalize the existing mission first.');
     this.mission = { schemaVersion: 1, id: this.id(), status: 'Recording', start: stamp(ms), end: null,
