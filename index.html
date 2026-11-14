@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#090a0c" />
+  <!-- Paint the existing black intro before the module and its stylesheet load. -->
+  <style>
+    html, body { margin: 0; width: 100%; height: 100%; background: #000; color-scheme: dark; overflow: hidden; }
+    #gl { background: #000; }
+    .video-loader { position: fixed; inset: 0; z-index: 20; background: #000; }
+    .video-loader .intro-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+  </style>
   <meta name="ai-disclosure" content="Code and documentation written with an AI coding assistant (Claude Code, Anthropic) under the team's direction. All map data is real NASA mission data; no AI-generated images, video or audio. See AI_DISCLOSURE.md in the repository." />
   <title>Aero Atlas | Mars Exploration</title>
   <meta name="description" content="Interactive Martian Exploration &amp; EVA Survival Planning System" />

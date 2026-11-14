@@ -172,6 +172,7 @@ class App {
   setActive(view, mode) {
     this.active = view;
     this.mode = mode;
+    this.journal?.setView(mode);
     this.labels.setVisible('orbit', mode === 'orbit');
     this.labels.setVisible('crater', mode === 'crater');
     for (const g of ['site', 'wp', 'eva', 'pin']) this.labels.setVisible(g, mode === 'site');

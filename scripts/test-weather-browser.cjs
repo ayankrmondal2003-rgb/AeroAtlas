@@ -1,0 +1,54 @@
+const {chromium,devices}=require('playwright');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const out=path.resolve('artifacts/weather');fs.mkdirSync(out,{recursive:true});
+(async()=>{
+ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ try{for(const mobile of [false,true]){
+  const ctx=await browser.newContext(mobile?devices['iPhone 14']:{viewport:{width:1440,height:1000}}),page=await ctx.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('503'))errors.push(m.text());});
+  await page.route('**/api/space-weather**',r=>r.fulfill({json:[]}));await page.route('https://api.nasa.gov/**',r=>r.fulfill({json:[],headers:{'access-control-allow-origin':'*'}}));
+  let catalogCalls=0;
+  await page.route('**/meda/catalog.json*',async r=>{catalogCalls++;if(catalogCalls===1)await r.fulfill({status:503,body:'Test failure'});else await r.continue();});
+  await page.goto(process.env.URL||'http://127.0.0.1:4175/?q=low');
+  await page.waitForFunction(()=>window.solAtlas?.journal?.loaded&&document.getElementById('loader').classList.contains('done'),null,{timeout:180000});
+  assert.equal(catalogCalls,0,'weather is lazy, does not block startup');
+  const idle=mode=>page.waitForFunction(m=>window.solAtlas.mode===m&&!window.solAtlas.busy,mode,{timeout:120000});
+  await page.evaluate(()=>{window.solAtlas.maxDt=2.5;window.solAtlas.descendToJezero();});await idle('crater');
+  if(mobile)await page.locator('#btn-layers').click();
+  assert.equal(await page.locator('[data-layer="weather"]').count(),0);
+  await page.locator('#btn-weather').click();await page.waitForFunction(()=>!document.querySelector('.weather-retry').hidden);
+  assert((await page.locator('.weather-status').textContent()).includes('503'));await page.locator('.weather-retry').click();
+  await page.waitForFunction(()=>!document.querySelector('.weather-data').hidden);
+  assert.equal(await page.locator('.weather-card').count(),4);assert.equal(await page.locator('.weather-sol option').count(),2);assert(await page.locator('.weather-retry').isHidden());
+  assert((await page.locator('.weather-badge').textContent()).includes('NOT LIVE'));
+  assert((await page.locator('.weather-card').first().textContent()).includes('00070M'));
+  const preserved=await page.evaluate(()=>({mode:solAtlas.mode,ltst:solAtlas.crater.ltst,params:JSON.stringify(solAtlas.planner.params)}));
+  await page.locator('.weather-detector').selectOption('temperature5');assert((await page.locator('.weather-card').first().textContent()).includes('ATS 5'));
+  await page.locator('.weather-variable').selectOption('pressure');assert((await page.locator('.weather-chart svg').getAttribute('aria-label')).includes('Pressure'));
+  await page.locator('.weather-slider').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator('.weather-slider').inputValue(),'1');
+  await page.keyboard.press('f');assert(!await page.evaluate(()=>solAtlas.fpv.active),'background shortcut blocked');
+  await page.locator('.weather-sol').selectOption('71');await page.waitForFunction(()=>document.querySelector('.weather-status').textContent.includes('sol 71 loaded'));
+  await page.locator('.weather-slider').evaluate(el=>{el.value=0;el.dispatchEvent(new Event('input',{bubbles:true}));});
+  assert((await page.locator('.weather-card').last().textContent()).includes('Unavailable'),'wind at midnight sol 71 is not fabricated');
+  assert.equal(await page.evaluate(()=>JSON.stringify({mode:solAtlas.mode,ltst:solAtlas.crater.ltst,params:JSON.stringify(solAtlas.planner.params)})),JSON.stringify(preserved));
+  await page.locator('.weather-sol').selectOption('70');await page.waitForFunction(()=>document.querySelector('.weather-status').textContent.includes('sol 70 loaded'));
+  await page.locator('.weather-detector').selectOption('temperature1');await page.locator('.weather-variable').selectOption('temperature');
+  await page.locator('.modal-card').evaluate(el=>el.scrollTop=0);await page.screenshot({path:path.join(out,`weather-${mobile?'mobile':'desktop'}.png`)});
+  assert(await page.locator('.modal-card').evaluate(el=>el.scrollWidth<=el.clientWidth+1),'no horizontal drawer overflow');
+  await page.locator('.weather-provenance summary').click();assert.equal(await page.locator('.weather-sources a[href$=".xml"]').count(),4);
+  await page.locator('.weather-sources a').last().focus();await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement.id),'modal-x','focus trapped');
+  await page.keyboard.press('Escape');assert(await page.locator('#modal').isHidden());assert.equal(await page.evaluate(()=>document.activeElement.id),'btn-weather');
+  // The original mineral dialog remains usable after the weather drawer closes.
+  await page.locator('#btn-mineral-science').click();assert(await page.locator('#mineral-science-title').isVisible());assert(!await page.locator('#modal').evaluate(el=>el.classList.contains('weather-modal')));await page.keyboard.press('Escape');
+  if(mobile)await page.locator('#btn-layers').click();
+  await page.evaluate(()=>window.solAtlas.enterSite());await idle('site');if(mobile)await page.locator('#btn-layers').click();
+  const verdict=await page.evaluate(()=>solAtlas.planner.result.verdict.lvl);
+  await page.locator('#btn-weather').click();await page.waitForFunction(()=>!document.querySelector('.weather-data').hidden);assert.equal(await page.locator('.weather-intelligence').count(),1);
+  await page.keyboard.press('Escape');assert.equal(await page.evaluate(()=>solAtlas.planner.result.verdict.lvl),verdict);assert(await page.locator('.journal-toggle').isVisible());
+  assert.deepEqual(errors,[]);console.log(`PASS ${mobile?'mobile':'desktop'}: lazy load, failure/retry, archived sols, detectors, chart, missing wind, keyboard/focus, no overflow, unchanged simulation, Mineral Science, Journal, no console errors`);
+  await ctx.close();
+ }}finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

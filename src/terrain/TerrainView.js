@@ -16,7 +16,6 @@ export const TERRAIN_LAYERS = [
   { id: 'holo', key: '6', name: 'Holo mode', srcCrater: 'display style', srcSite: 'display style' },
   { id: 'traverse', key: '7', name: 'Perseverance traverse', srcCrater: 'NASA/JPL MMGIS · end-of-drive fixes', srcSite: 'NASA/JPL MMGIS · end-of-drive fixes' },
   { id: 'minerals', key: '', name: 'Minerals', srcCrater: 'MRO CRISM · phase 2', srcSite: 'MRO CRISM · phase 2', locked: true },
-  { id: 'weather', key: '', name: 'Live weather', srcCrater: 'Perseverance MEDA · phase 2', srcSite: 'Perseverance MEDA · phase 2', locked: true },
 ];
 
 const _v = new THREE.Vector3();

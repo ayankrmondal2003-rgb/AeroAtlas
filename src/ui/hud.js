@@ -5,12 +5,14 @@ import { ORBIT_LAYERS } from '../orbit/OrbitView.js';
 import { describeUnit, JEZERO_UNITS } from '../data/geology.js';
 import { TERRAIN_LAYERS } from '../terrain/TerrainView.js';
 import { renderProfile } from './profile.js';
+import { readinessHTML } from './readiness.js';
 import { evaDoseMSv, RAD_MSV_PER_DAY } from '../terrain/eva.js';
 import { url as dataUrl } from '../core/assets.js';
 import { Recorder } from './recorder.js';
 import { FEATURES } from '../config.js';
 import { describeSpaceWeather } from '../lib/spaceweather.js';
 import { openMineralScience } from './mineralScience.js';
+import { openWeatherIntelligence } from './weatherIntelligence.js';
 
 const $ = (id) => document.getElementById(id);
 const ICON = {
@@ -73,6 +75,7 @@ export class Hud {
   }
 
   setCrumbs(mode) {
+    this.left.classList.toggle('marswalk-planner', mode === 'site');
     const c = $('crumbs');
     const parts = [['orbit', 'Mars'], ['crater', 'Jezero Crater'], ['site', 'Marswalk Zone']];
     const idx = parts.findIndex((p) => p[0] === mode);
@@ -328,6 +331,7 @@ export class Hud {
         <div class="sec-h">Data layers <span class="tag">${site ? 'HiRISE ZONE' : 'CTX CRATER'}</span></div>
         ${rows}
         <button class="row" id="btn-mineral-science" aria-haspopup="dialog" aria-controls="modal"><span class="ic">${ICON.book}</span><span><div class="nm">Mineral Science</div><div class="ds">Jezero research · no map overlay</div></span></button>
+        <button class="row" id="btn-weather" aria-haspopup="dialog" aria-controls="modal"><span class="ic">${ICON.book}</span><span><div class="nm">Jezero Weather</div><div class="ds">Archived MEDA observations · not live</div></span></button>
         <div id="t-legend"></div>
       </div>
       <div class="sec">
@@ -348,7 +352,7 @@ export class Hud {
           <span class="k">Dust opacity</span><span class="v">τ ≈ 0.5</span>
           <span class="k">Radiation</span><span class="v">≈ 0.67 mSv/sol</span>
         </div>
-        <div class="assump">Typical ranges for this season from published Perseverance MEDA results. Radiation dose from Curiosity RAD at Gale (Hassler et al. 2014). The live MEDA feed is planned for phase 2.</div>
+        <div class="assump">Typical environmental context, not timestamped observations. Radiation dose from Curiosity RAD at Gale (Hassler et al. 2014). Open Jezero Weather for archived MEDA readings; these do not change the simulated EVA assumptions.</div>
       </div>` : ''}`;
     this.right.querySelectorAll('[data-layer]').forEach((d) => {
       d.onclick = () => {
@@ -358,6 +362,7 @@ export class Hud {
       };
     });
     $('btn-mineral-science').onclick = (e) => openMineralScience(view.id, e.currentTarget);
+    $('btn-weather').onclick = (e) => openWeatherIntelligence(this.app, e.currentTarget);
     const rt = $('r-time'), re = $('r-exag');
     rt.oninput = () => { view.setTime(+rt.value); this.sunInfo(view); };
     rt.onchange = () => { if (site) this.app.planner.refreshSun(); };
@@ -450,21 +455,18 @@ export class Hud {
     const r = pl.result;
     const wps = pl.waypoints.map((w, i) => `
       <div class="wp"><div class="n"><span>${i + 1}</span></div>
-        <div style="min-width:0"><div class="nm">${w.name}${w.poi?.photo ? ` <button class="ph-btn" data-photo="${i}" title="Perseverance's photo from this spot">PHOTO</button>` : ''}</div><div class="ds" title="${w.poi?.reason || ''}">${w.poi?.reason || w.note || (i === 0 ? 'EVA start / airlock' : 'custom science stop')}</div></div>
+        <div class="wp-copy"><div class="nm"><span class="wp-name">${w.name}</span>${w.poi?.photo ? ` <button class="ph-btn" data-photo="${i}" title="Perseverance's photo from this spot">PHOTO</button>` : ''}</div><div class="ds" title="${w.poi?.reason || ''}">${w.poi?.reason || w.note || (i === 0 ? 'EVA start / airlock' : 'custom science stop')}</div></div>
         ${i > 0 ? `<button class="x" data-rm="${i}" title="Remove stop">✕</button>` : '<span></span>'}
       </div>`).join('');
     let body = '';
     if (!r) body = '<div class="sub">Click anywhere on the map to drop a pin and route there, or pick a point of interest.</div>';
-    else if (r.failed) body = `<div class="verdict nogo"><span class="ic">${ICON.stop}</span><div>NO SAFE ROUTE<small>Every path crosses slopes over ${pl.params.maxSlope}°. Move the stop or raise the slope limit.</small></div></div>`;
+    else if (r.failed) body = readinessHTML({ lvl: 'nogo', issues: [{ msg: `No safe route: every path crosses slopes over ${pl.params.maxSlope}°. Move the stop or raise the slope limit.` }] });
     else {
       const b = r.budget;
       const v = r.verdict;
       const o2Pct = Math.max(0, Math.min(100, (b.o2 / pl.params.o2CapKg) * 100));
       const reservePct = 100 - pl.params.reservePct;
       const o2Col = b.remaining < b.reserveKg ? 'var(--critical)' : b.marginPct < pl.params.reservePct + 15 ? 'var(--warning)' : 'var(--data)';
-      const vIcon = v.lvl === 'go' ? ICON.ok : v.lvl === 'caution' ? ICON.warn : ICON.stop;
-      const vText = v.lvl === 'go' ? 'MARSWALK READY' : v.lvl === 'caution' ? 'GO WITH CAUTION' : 'NO-GO';
-      const vSub = v.issues.length ? v.issues.map((i) => i.msg).join(' · ') : `All limits met, ${b.marginPct.toFixed(0)} % O₂ left at ingress`;
       body = `
         <div class="stats">
           <div class="stat"><div class="k">DISTANCE</div><div class="v">${(b.distance / 1000).toFixed(2)}<small>km</small></div></div>
@@ -488,13 +490,13 @@ export class Hud {
         </div>
         ${this.spaceWeatherBlock()}
         <div class="assump">Dose at the rate Curiosity's RAD measured on the surface (${RAD_MSV_PER_DAY} mSv/day); NASA's career limit is 600 mSv. Shelter time is the longest ${pl.params.rover ? 'drive' : 'walk'} back to the airlock if a solar-storm warning comes in, worst at ${(r.shelter.d / 1000).toFixed(2)} km along the route.</div>
-        <div class="verdict ${v.lvl}"><span class="ic">${vIcon}</span><div>${vText}<small>${vSub}</small></div></div>
+        ${readinessHTML(v, b.marginPct)}
         ${r.o2Out ? `<div class="assump dead-note"><b>✖ O₂ runs out at ${(r.o2Out.d / 1000).toFixed(2)} km</b> (${formatHM(r.sun.start + r.o2Out.t / 3698.9)} LTST, ${fmtDur(r.o2Out.t)} into the EVA) while ${r.o2Out.kind === 'stop' ? 'working at a stop' : pl.params.rover ? 'driving' : 'walking'}. The red dashes are the part of the route EV1 never reaches. Press SIMULATE to see it.</div>` : ''}
-        <div class="assump">${pl.params.rover
+        <div class="assump planner-pnr">${pl.params.rover
           ? (r.pnr ? `<b style="color:#ff7b7b">Walkback limit</b> at ${(r.pnr.d / 1000).toFixed(2)} km (red marker). If the rover breaks down past it, walking home needs ${r.pnr.need.toFixed(2)} kg of O₂ but only ${r.pnr.limit.toFixed(2)} kg is available above the reserve. Apollo 15–17 drove under the same rule.`
             : `<b>Walkback rule met</b> (as on Apollo 15–17): if the rover breaks down anywhere on this drive, the crew can walk home and keep the O₂ reserve. Closest call: ${r.abortWorst ? `${r.abortWorst.need.toFixed(2)} of ${r.abortWorst.limit.toFixed(2)} kg at ${(r.abortWorst.d / 1000).toFixed(2)} km` : '—'}.`)
           : (r.pnr ? `<b style="color:#ff7b7b">Point of no return</b> at ${(r.pnr.d / 1000).toFixed(2)} km (red marker). Past it, walking straight back needs ${r.pnr.need.toFixed(2)} kg of O₂ but only ${r.pnr.limit.toFixed(2)} kg is available above the reserve.` : 'No point of no return: from any point on the way out, EV1 can walk straight back to the airlock and keep the O₂ reserve.')}</div>
-        <div class="sec-h" style="margin:14px 0 2px">Elevation profile <span class="tag">HiRISE 1 m DTM</span></div>
+        <div class="sec-h planner-profile-heading">Elevation profile <span class="tag">HiRISE 1 m DTM</span></div>
         <div class="profile" id="profile"></div>
         <div class="assump" style="margin-top:6px">Straight-line path: ${(r.direct.distance / 1000).toFixed(2)} km, crossing slopes up to <b>${r.direct.maxFine.toFixed(0)}°</b> (red dashes). The planned route stays under <b>${r.budget.fineMax.toFixed(0)}°</b>.</div>`;
     }
@@ -504,12 +506,12 @@ export class Hud {
         <div class="ctl goal"><label for="p-goal">Mission goal</label><select id="p-goal">${MISSION_GOALS.map((g) => `<option value="${g.id}" ${g.id === pl.goal ? 'selected' : ''}>${g.name}</option>`).join('')}</select></div>
         <div class="assump">${(MISSION_GOALS.find((g) => g.id === pl.goal) || MISSION_GOALS[0]).why}</div>
         <div id="wps">${wps}</div>
-        <div class="btn-row">
+        <div class="btn-row planner-primary-actions">
           <button class="btn small ${pl.addMode ? 'primary' : ''}" id="b-add">${pl.addMode ? 'CLICK MAP…' : '+ ADD STOP'}</button>
           <button class="btn small ${pl.sim ? 'primary' : ''}" id="b-sim" ${r && !r.failed ? '' : 'disabled'}>${pl.sim ? '■ STOP EVA' : '▶ SIMULATE EVA'}</button>
           <button class="btn small" id="b-plan">RESET</button>
         </div>
-        <div class="seg" style="margin-top:8px"><button id="b-foot" class="${pl.params.rover ? '' : 'on'}" title="Walk every leg">ON FOOT</button><button id="b-rover" class="${pl.params.rover ? 'on' : ''}" title="Drive between stops on an unpressurised rover, within walking distance of home">ROVER + WALKBACK</button></div>
+        <div class="seg"><button id="b-foot" class="${pl.params.rover ? '' : 'on'}" title="Walk every leg">ON FOOT</button><button id="b-rover" class="${pl.params.rover ? 'on' : ''}" title="Drive between stops on an unpressurised rover, within walking distance of home">ROVER + WALKBACK</button></div>
         <div class="seg"><button id="b-ret" class="${pl.returnToStart ? 'on' : ''}">RETURN TO LZ</button><button id="b-follow" class="${pl.follow ? 'on' : ''}">FOLLOW CAM</button></div>
         ${this.app.fpv ? `<button class="btn fpv-btn ${this.app.fpv.active ? 'on' : ''}" id="b-fpv" title="Stand on the terrain at eye height (F)">${this.app.fpv.active ? '✕ EXIT HELMET VIEW' : '◉ HELMET VIEW · WALK IT'}</button>` : ''}
       </div>
@@ -657,6 +659,8 @@ export class Hud {
       <h3>PERSEVERANCE TRAVERSE</h3>
       <table><tr><th>LAYER</th><th>SOURCE</th><th>PRODUCT</th></tr>
         <tr><td>Drive path, sol labels</td><td>NASA/JPL-Caltech · MMGIS "Where is Perseverance?"</td><td>End-of-drive localisations (M20_waypoints), sol 0–${this.app.assets?.traverse?.lastSol ?? '?'}, from mars.nasa.gov</td></tr></table>
+      <h3>ARCHIVED JEZERO WEATHER</h3>
+      <p>Perseverance MEDA sols 70–71: calibrated ATS and derived pressure, humidity and wind. Archived observations, not live weather. Sensor-specific coverage, product versions and processing details are available in Jezero Weather. <a href="https://doi.org/10.17189/1522849" target="_blank" rel="noopener noreferrer">Rodriguez-Manfredi et al. (2021), NASA PDS</a>.</p>
       <h3>LIVE SPACE WEATHER</h3>
       <table><tr><th>CHECK</th><th>SOURCE</th><th>PRODUCT</th></tr>
         <tr><td>CMEs forecast to reach Mars (Watney check, mission clock)</td><td>NASA DONKI, Community Coordinated Modeling Center, NASA Goddard (api.nasa.gov)</td><td>WSA-ENLIL solar-wind simulations, last 30 days: latest forecast per CME with a Mars arrival. ${this.app.spaceWeather?.ok ? `Fetched ${new Date(this.app.spaceWeather.summary.checked).toUTCString().slice(5, 22)} UTC.` : 'Not fetched this session (offline?).'} Advisory: it does not change the verdict</td></tr></table>

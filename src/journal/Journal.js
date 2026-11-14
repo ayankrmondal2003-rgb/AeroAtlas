@@ -8,10 +8,17 @@ export class Journal {
   constructor(app) {
     this.app=app;this.store=new MissionStore();this.history=new Map();this.source=null;this.selected=null;this.loaded=false;
     this.recorder=new MissionRecorder({changed:()=>{this.dirty=true;this.refresh();void this.save();}});
-    this.route=new JournalRoute(app);this.urls=[];this.build();void this.load();
+    this.route=new JournalRoute(app);this.urls=[];this.build();this.setView(app.mode);void this.load();
     this.timer=setInterval(()=>{this.refresh();if(active(this.recorder.mission)){this.recorder.flush();this.dirty=true;void this.save();}this.position();},2000);
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&active(this.recorder.mission)){this.recorder.pause();this.message.textContent='Recording paused while the page is hidden. Resume when ready.';}});
     window.addEventListener('pagehide',()=>{if(active(this.recorder.mission)){this.recorder.flush();this.dirty=true;void this.save();}});
+  }
+  setView(mode) {
+    this.el.hidden=mode!=='site';
+    if(this.el.hidden){
+      this.content.hidden=true;
+      this.el.querySelector('.journal-toggle').setAttribute('aria-expanded','false');
+    }
   }
   async load() {
     try {

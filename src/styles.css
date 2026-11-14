@@ -784,3 +784,96 @@ body.fpv.compact.landscape .h-suit { top: auto; bottom: calc(144px + env(safe-ar
 body.fpv.compact.landscape .eva-journal .journal-toggle { min-height: 30px; }
 body.fpv.compact.landscape #journal-content { padding: 6px; }
 
+
+/* Marswalk-only spacing refinement. Existing panel width and responsive sheets remain unchanged. */
+.panel.marswalk-planner { background: #1c1918; border-color: #665046; box-shadow: none; line-height: 1.45; scrollbar-gutter: stable; }
+.panel.marswalk-planner::before { display: none; }
+body:not(.fpv) .panel.marswalk-planner { bottom: 116px; }
+body.compact:not(.fpv) .panel.marswalk-planner { bottom: calc(108px + env(safe-area-inset-bottom, 0px)); max-height: min(58dvh, calc(100dvh - 168px)); }
+.marswalk-planner .sec { padding: 24px; background: none; }
+.marswalk-planner .sec-h { margin-bottom: 14px; gap: 10px; letter-spacing: .12em; }
+.marswalk-planner .sec-h .tag { text-align: right; }
+.marswalk-planner .assump, .marswalk-planner .sub { line-height: 1.5; }
+.marswalk-planner .goal { margin: 0; gap: 12px; }
+.marswalk-planner .goal select { min-height: 42px; padding: 9px 10px; }
+.marswalk-planner .goal + .assump { margin: 14px 0 22px; font-size: 13px; }
+.marswalk-planner #wps { display: grid; gap: 12px; margin-bottom: 22px; }
+.marswalk-planner .wp { grid-template-columns: 22px minmax(0,1fr) 24px; min-height: 82px; gap: 12px; padding: 14px 12px; border: 1px solid #514139; border-radius: 6px; background: #24201e; }
+.marswalk-planner .wp-copy { min-width: 0; }
+.marswalk-planner .wp .nm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; white-space: normal; overflow: visible; line-height: 1.45; font-size: 14px; }
+.marswalk-planner .wp-name { display: block; min-width: 0; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.marswalk-planner .wp .ds { margin-top: 6px; white-space: normal; overflow-wrap: anywhere; line-height: 1.45; color: var(--text-2); }
+.marswalk-planner .wp .n { color: var(--hud-hi); border-color: #aa8069; }
+.marswalk-planner .wp .x { width: 24px; min-width: 24px; min-height: 32px; padding: 0; align-self: start; }
+.marswalk-planner .wp .ph-btn { flex: none; margin: 0; padding: 3px 7px; min-height: 28px; font-size: 10px; }
+.marswalk-planner .planner-primary-actions { display: grid; grid-template-columns: 1fr 1.35fr .75fr; gap: 10px; margin: 0; }
+.marswalk-planner .seg { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-top: 12px; }
+.marswalk-planner .btn, .marswalk-planner .seg button, .marswalk-planner .ctl select { background: #292320; box-shadow: none; border-radius: 5px; border-color: #705548; }
+.marswalk-planner .btn, .marswalk-planner .seg button { min-height: 44px; padding: 8px 5px; font-size: 11px; letter-spacing: .04em; line-height: 1.4; min-width: 0; white-space: normal; }
+.marswalk-planner .btn.primary { background: #d79570; color: #211713; border-color: #d79570; }
+.marswalk-planner .btn.on, .marswalk-planner .seg button.on { background: #50392c; border-color: #d79570; color: #f4d8c3; }
+.marswalk-planner .btn:hover, .marswalk-planner .seg button:hover { background: #49392e; color: var(--text); }
+.marswalk-planner .btn.primary:hover { background: #e5ac88; color: #211713; }
+.marswalk-planner .fpv-btn { margin-top: 12px; }
+.marswalk-planner .stats { gap: 12px; }
+.marswalk-planner .stat { padding: 10px; background: #24201e; box-shadow: none; }
+.marswalk-planner .meter, .marswalk-planner .kv { margin-top: 20px; }
+.marswalk-planner .meter .lbl { flex-wrap: wrap; gap: 4px; }
+.marswalk-planner .ctl { margin-top: 16px; }
+.marswalk-planner .goal { margin-top: 0; }
+.marswalk-planner .mission-readiness { margin-top: 24px; padding-top: 20px; border-top: 1px solid #514139; }
+.readiness-gauge { display: block; width: 100%; height: auto; max-width: 310px; margin: 0 auto 20px; overflow: visible; }
+.readiness-zone-labels { fill: var(--text); font: 600 10px var(--ui); letter-spacing: .04em; }
+.readiness-info h3 { font-size: 11px; letter-spacing: .16em; color: var(--hud-hi); margin: 0 0 12px; }
+.readiness-info strong { display: block; font-size: 15px; line-height: 1.45; }
+.mission-readiness.go .readiness-info strong { color: #8cce99; }
+.mission-readiness.caution .readiness-info strong { color: #e8ad26; }
+.mission-readiness.nogo .readiness-info strong { color: #f18f8f; }
+.readiness-info p, .readiness-info ul { margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: var(--text-2); }
+.readiness-info ul { padding-left: 16px; }
+.readiness-info li + li { margin-top: 8px; }
+
+/* Archived MEDA drawer: separate from the simulation and its clock. */
+.modal.weather-modal { place-items: center end; background: rgba(0,0,0,.38); }
+.weather-modal .modal-card { width: min(620px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); padding: 26px 22px; background: #1c1918; border-color: #665046; }
+.weather-intelligence { min-width: 0; }
+.weather-intelligence [hidden] { display: none !important; }
+.weather-intelligence .weather-badge { color: var(--hud-hi); font-size: 11px; letter-spacing: .12em; margin: 10px 0; }
+.weather-status { font-size: 13px; line-height: 1.5; color: var(--text-2); margin: 16px 0; }
+.weather-controls, .weather-cards { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.weather-intelligence label { display: block; color: var(--hud-hi); font-size: 13px; }
+.weather-intelligence select { display: block; width: 100%; min-width: 0; min-height: 44px; margin-top: 7px; padding: 8px; color: var(--text); background: #292320; border: 1px solid #705548; border-radius: 5px; font: inherit; }
+.weather-intelligence .weather-utc { margin: 14px 0; font-size: 12px; overflow-wrap: anywhere; }
+.weather-time output { display: block; margin: 6px 0; color: var(--data); font-family: var(--mono); font-size: 12px; }
+.weather-slider { width: 100%; min-height: 36px; accent-color: var(--coral); margin: 0 0 12px; }
+.weather-card { padding: 14px; background: #24201e; border: 1px solid #514139; border-radius: 6px; overflow-wrap: anywhere; }
+.weather-card h3 { margin: 0 0 12px; letter-spacing: .06em; }
+.weather-card strong { display: block; font-family: var(--mono); font-size: 18px; color: var(--data); }
+.weather-card p, .weather-card small { display: block; font-size: 11px; line-height: 1.5; color: var(--text-2); margin-top: 8px; }
+.weather-chart-control { margin-top: 20px; }
+.weather-chart svg { display: block; width: 100%; height: auto; }
+.weather-chart text { fill: var(--text-2); font: 11px var(--mono); }
+.weather-grid { stroke: #514139; stroke-width: .6; }
+.weather-range { stroke: var(--hud-dim); stroke-width: 1; }
+.weather-point { fill: var(--data); }
+.weather-point.selected { fill: var(--coral); }
+.weather-cursor { stroke: var(--coral); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
+.weather-chart-key, .weather-bin-summary, .weather-disclaimer { font-size: 12px; }
+.weather-provenance { margin: 20px 0; border-top: 1px solid #514139; padding-top: 16px; }
+.weather-provenance summary { cursor: pointer; color: var(--hud-hi); min-height: 36px; }
+.weather-sources { overflow-wrap: anywhere; font-size: 12px; }
+.weather-sources small { display: block; margin-top: 6px; }
+.weather-disclaimer { border-top: 1px solid #514139; padding-top: 14px; }
+@media (max-width: 480px) {
+  .weather-modal .modal-card { padding: 22px 14px; }
+  .weather-controls, .weather-cards { gap: 10px; }
+  .weather-card { padding: 10px; }
+  .weather-card strong { font-size: 15px; }
+}
+.marswalk-planner .planner-pnr { padding-top: 20px; margin-top: 20px; border-top: 1px solid #514139; font-size: 13px; }
+.marswalk-planner .planner-profile-heading { margin: 24px 0 12px; }
+.marswalk-planner .profile svg { height: 132px; }
+@media (max-width: 1100px) {
+  .marswalk-planner .sec { padding: 24px 18px; }
+  .marswalk-planner .wp { gap: 10px; padding: 12px 10px; }
+}

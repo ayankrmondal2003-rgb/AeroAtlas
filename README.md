@@ -575,3 +575,6 @@ NASA imagery is not copyrighted. No NASA logos are used.
 ## Licence
 
 The code in this repository is open source under the [Apache License 2.0](LICENSE), as NASA Space Apps requires for work built for the challenge. The NASA data in `public/data/` is not copyrighted and is credited above. The fonts are under the SIL Open Font Licence; three.js and Vite are under the MIT licence.
+## Archived MEDA weather
+
+Jezero Weather opens from the crater/Marswalk data panel. It displays verified, locally packaged Perseverance MEDA observations for archived sols 70–71, with separate sensor timestamps, five-minute trend summaries, missing-data states and PDS citations. It is **not live weather** and does not change EVA calculations. See [MEDA_DATA.md](MEDA_DATA.md) for provenance, quality rules, regeneration and tests.

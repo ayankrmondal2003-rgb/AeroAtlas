@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "datasetVersion": "meda-70-71-v1",
+  "generatedAt": "2026-11-14T17:11:40.013Z",
+  "citation": "Rodriguez-Manfredi et al. (2021), The Mars Environmental Dynamics Analyzer, MEDA, NASA PDS",
+  "doi": "https://doi.org/10.17189/1522849",
+  "sols": [
+    {
+      "sol": 70,
+      "file": "sol-0070.json",
+      "sha256": "c3033f0e5eb52f6e6722c4bd7bc50b5c823c21e41b7ed950b0aa065e2296a5f9",
+      "utcStart": "2021-05-01T02:35:23.288Z",
+      "utcEnd": "2021-05-02T03:14:57.987Z"
+    },
+    {
+      "sol": 71,
+      "file": "sol-0071.json",
+      "sha256": "222b9698377ca9da25b409b9aa391ffdb652613e8de7796ef07717da0e20a774",
+      "utcStart": "2021-05-02T03:14:58.487Z",
+      "utcEnd": "2021-05-03T03:54:33.187Z"
+    }
+  ],
+  "notes": [
+    "Archived rover observations, not live weather or forecasts.",
+    "ATS detectors are kept separate. RH is relative to ice at the sensor temperature.",
+    "Empty values and 999999999 / 9999999999 sentinels excluded. Wind requires ROVER_STILL=1.",
+    "Pressure uncertainty omitted: source label has an inconsistent unit.",
+    "No calibrated replacement for missing derived values. No simulated safety calculations use these observations."
+  ]
+}
