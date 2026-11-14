@@ -1,23 +1,33 @@
 # AERO ATLAS
 
-**Interactive Martian Exploration & EVA Survival Planning System**
+## Explore Mars. Plan the EVA. Understand the cost of every step.
 
-Originally developed as **Sol Atlas** by **The SOL Explorers** · NASA Space Apps Challenge 2026 · challenge: *Interplanetary Survival Guide: Martian Map*
+**Interactive Martian Exploration & EVA Survival Planning System — Team 4 Loops**
 
+<<<<<<< HEAD
 Screenshots below document the original Sol Atlas build; historical branding in those captures is retained.
+=======
+### [Launch Aero Atlas — Live Demo](https://aeroatlas.onrender.com)
 
-![Historical Sol Atlas: Mars from orbit with landing sites and data layers](docs/screenshots/01-orbit.jpg)
+Aero Atlas connects planetary exploration, terrain analysis, mission planning and simulated surface operations in one browser application. Start with the Mars globe, descend into Jezero Crater, inspect the terrain, plan an expedition, then follow the astronaut from above or through a first-person helmet view.
+>>>>>>> f2e5999045dd295d4db076c32c89edefdc9071dc
 
-In *The Martian*, Mark Watney survives by doing the maths himself: oxygen, distance, daylight, terrain. Aero Atlas does that maths for the first crews. It stacks data from five NASA missions and ESA's Mars Express on one 3D map, finds the safest route for a walk on foot to any point you pick, and checks whether the astronaut gets home with oxygen to spare. If the plan comes up short, the EVA simulation shows exactly where the suit runs dry. Then you can put on the helmet and walk the real terrain at eye height.
+Presented in the context of NASA Space Apps 2026 and the *Interplanetary Survival Guide: Martian Map* challenge. This is an independent educational prototype, not a certified operational tool or an agency endorsement.
 
-![Helmet view: the delta-front scarp in Jezero at true scale, from the HiRISE 1 m elevation model](docs/screenshots/08-helmet-view.jpg)
+## Short description
 
-This is the **phase-1 prototype** made for the 240-second local-judging video. Jezero Crater is the only site unlocked; the other landing sites are marked "phase 2".
+Aero Atlas is a browser-based Mars exploration and EVA planning simulator by Team 4 Loops. It combines NASA-derived 3D terrain, oxygen-aware route planning, first-person exploration, archived MEDA weather, and a mission journal to help users understand how terrain, time, and resources shape a simulated Mars expedition.
 
----
+See [PROJECT_DESCRIPTION.md](PROJECT_DESCRIPTION.md) for a separate reusable description.
 
-## Contents
+## Team 4 Loops
 
+- **Arpan Biswas**
+- **Ayan Kumar Mondal**
+- **Aritra Adak**
+- **Aritra Pal**
+
+<<<<<<< HEAD
 - [How it works](#how-it-works)
 - [What's new in the polish build](#whats-new-in-the-polish-build)
 - [Data layers](#data-layers)
@@ -35,78 +45,66 @@ This is the **phase-1 prototype** made for the 240-second local-judging video. J
 - [Limitations and roadmap](#limitations-and-roadmap)
 - [Credits](#credits)
 - [Licence](#licence)
+=======
+## Objective and problem
+>>>>>>> f2e5999045dd295d4db076c32c89edefdc9071dc
 
----
+A scientifically interesting destination is not automatically a feasible EVA target. A straight line on a map cannot explain climbing effort, oxygen consumption, science-stop duration or the reserve required to return home. Scientific datasets also operate at different scales and observation dates.
 
-## How it works
+Our objective is to make those relationships visible and understandable. Aero Atlas connects planetary context with local terrain, uses explicit assumptions to estimate an expedition's resource budget, and lets users revise and experience their plan. Students, educators, space enthusiasts and developers can explore the tradeoffs without needing a specialized desktop GIS installation.
 
-Aero Atlas has three levels. You move between them by scrolling, like zooming from a system map down to a planet surface in a space game.
+## Our differentiator
 
-### 1. Orbit
+The project brings several capabilities into one connected learning workflow. These are design strengths, not claims of exclusive features across all planetary software.
 
-A rotating Mars with real Viking colour, MOLA relief, a thin dusty atmosphere, Phobos and Deimos. Ten landing sites are marked. Layer `4` lays the **USGS Geologic Map of Mars** (SIM 3292, from the USGS-NASA Planetary Geologic Mapping Program) over the globe; point at any spot to read its rock unit and age. Jezero sits in unit HNt on the rim of the Isidis impact basin, ground more than 3.2 billion years old. Press `Z` (or **Human Exploration Zones** under Display) to show the 38 **Exploration Zones NASA's 2015 workshop proposed for the first human landings**, each with a 100 km radius. Jezero and our Marswalk zone sit inside the *Jezero-Isidis-Syrtis* zone, 51 km from its centre: the site we plan for is one NASA's own human-mission planners put forward. Scroll in and the camera locks onto Jezero; scroll again, or click, to descend. A live mission clock shows the Perseverance sol, local time at Jezero, the Martian season and the current Earth–Mars signal delay.
+| Capability | User benefit |
+| --- | --- |
+| Globe → crater → Marswalk → helmet | Keep geographic context while changing scale. |
+| Terrain-aware and oxygen-aware routing | Compare resource cost and return feasibility, not just distance. |
+| Editable EVA assumptions | Understand why a route changes from ready to caution or no-go. |
+| Return and rover walkback checks | Evaluate getting home as well as reaching a destination. |
+| Recorded movement versus planned route | Review what the simulated astronaut actually did. |
+| Scientific provenance and missing-data labels | Distinguish evidence, interpretation and unavailable readings. |
+| Separate MEDA and DONKI panels | Keep archived surface measurements separate from solar advisories. |
+| Browser-local mission history | Record and review missions without a cloud account. |
 
-| Geologic map (layer 4) | NASA's proposed human Exploration Zones (`Z`) |
-|---|---|
-| ![USGS Geologic Map of Mars around Jezero, with the unit legend and the unit under the cursor](docs/screenshots/14-geologic-map.jpg) | ![The 2015 human Exploration Zones on the globe; Jezero sits inside Jezero-Isidis-Syrtis](docs/screenshots/15-exploration-zones.jpg) |
+## Current feature guide
 
-### 2. Jezero Crater
+### Exploration and terrain
 
-The whole crater (89 × 101 km) as a 3D block, built from the orbital imagery and elevation model NASA prepared for Perseverance. The terrain is lit by the real Sun position, with shadows that move as you drag the time-of-day slider.
+The globe displays mission-derived imagery and orbital layers. Jezero is the detailed unlocked destination; other landing sites are future expansion points. Crater terrain provides regional context, while the approximately 6 × 6 km Marswalk zone supports local route planning. Available views include imagery, elevation, slope hazard, thermal context, contours, holographic styling and the bundled Perseverance traverse.
 
-| Crater | Elevation + contours |
-|---|---|
-| ![Jezero crater in 3D](docs/screenshots/02-crater.jpg) | ![Elevation layer with contours](docs/screenshots/03-crater-elevation.jpg) |
+### Planning and surface simulation
 
-The gold line is **Perseverance's real drive path**: 555 end-of-drive positions from NASA/JPL's mission waypoint feed, sol 0 to 2022 (October 2026, 45.25 km). It runs from the landing site, around Séítah, across the delta and up the crater rim. Layer `7` toggles it.
+Choose a science goal, add stops or drop a custom pin. The planner computes terrain-aware routes with A* and estimates distance, time, metabolic effort, oxygen and return constraints. It supports walking and rover travel with walkback limits. The readiness gauge presents categories, not a survival probability. The profile relates elevation changes to distance; playback advances EV1 and shows wrist telemetry.
 
-![Perseverance's real traverse across Jezero, with sol markers](docs/screenshots/13-perseverance-traverse.jpg)
+Helmet view connects eye-level terrain exploration with simulated suit oxygen, metabolic power, burn rate, navigation and time progression. The proposed crew landing zone is a scenario assumption, not an existing human base.
 
-### 3. Marswalk zone
+### EVA Journal
 
-A 6 × 6 km zone around Perseverance's landing site, Séítah, the delta front and the Three Forks sample depot, built from a 25 cm per pixel HiRISE mosaic and a 1 m elevation model. This is where you plan the walk:
+Start recording from the Journal while in helmet view or EV1 playback. Record actual simulated movement, pause/resume, add categorized notes, review saved history and export PNG report pages. IndexedDB stores history in the current browser and origin. Clearing site data can erase missions; there is no automatic cloud backup.
 
-- **Start from a science goal.** Pick a mission goal and the plan follows from it: *Bring the samples home* (the Three Forks tubes), *Date the crater floor* (Séítah's olivine bedrock), *Look for signs of ancient life* (the delta front's lake sediments), or the *Grand tour*. Each goal says why this spot answers it, with its source.
-- **See it before you go.** Each science stop carries a real Perseverance photo taken at that spot (Navcam or Mastcam-Z raw images), so the crew knows what the place looks like before they arrive. Hover a stop and click its photo, or press PHOTO in the plan: it opens full screen, and ‹ › or the arrow keys step through all the stop photos.
-- **Route anywhere, like a maps app.** Click or tap any spot to drop a pin. The card shows its coordinates, elevation, slope class and distance from the airlock. **ROUTE HERE** plans the walk there and back; **ADD STOP** adds it to the plan; **STAND HERE** puts you there in the helmet view.
-- **Safest route.** Aero Atlas finds the path that uses the least oxygen while avoiding slopes too steep to walk. A red dashed line shows the straight-line path for comparison.
-- **The Watney check.** Distance, EVA time, oxygen used, oxygen left at the airlock, daylight left, the EVA's radiation dose and the storm-shelter time (how long the walk back takes from the farthest point if a solar storm is forecast), ending in **MARSWALK READY**, GO WITH CAUTION or NO-GO.
-- **Live space weather at Mars.** When online, the Watney check (and the orbit view's mission clock) asks NASA's **DONKI** service which coronal mass ejections NASA's WSA-ENLIL solar-wind model forecasts to reach Mars. If one is due within three days, or arrived in the last day, it says when, how fast the CME was and links to NASA's forecast, so the crew can keep the walk inside the storm-shelter time. On 13 Nov 2026 it showed a CME forecast to glance Mars at 12:00 UTC that day; the model forecast nine CMEs reaching Mars in the 30 days before. The line is advisory and doesn't change the verdict, and offline it just says "not checked".
-- **Rover with a walkback limit.** Switch the plan from ON FOOT to ROVER + WALKBACK and the crew drives between stops on an unpressurised rover. Apollo 15–17 drove under the same rule: never go farther than the crew could walk home if the rover broke down. Aero Atlas checks it along the whole drive and marks the walkback limit in red when a plan breaks it.
-- **Point of no return.** If the suit can't carry enough oxygen, a red marker shows the last point where turning back still keeps the reserve.
-- **EVA flyover.** Simulate the walk with a chase camera and a wrist display (next stop, oxygen left, dust). The wrist turns amber past the point of no return and red when the reserve is reached. The profile chart follows EV1 as it walks.
-- **Where the oxygen runs out.** If the plan needs more O₂ than the suit holds, the planner marks the exact spot and time the tank runs dry, and draws the unreachable rest of the route as red dashes. In the simulation, EV1 stops there and its marker turns red. The wrist display then shows how long a mayday takes to reach Earth (about 14 minutes now) and when the earliest reply could arrive. Nobody on Earth can help in time, so the plan has to be right before the airlock opens.
+Recorded and planned routes are separate. Missing telemetry remains unavailable. Oxygen summaries use comparable readings within sessions and identify partial coverage instead of counting refills or resets as consumption. Journal recording differs from the footer REC screen-capture control.
 
-| Planned route | Point of no return |
-|---|---|
-| ![Planned route through the landing site, Three Forks and Séítah](docs/screenshots/04-marswalk-route.jpg) | ![Red point-of-no-return marker with a 0.25 kg suit](docs/screenshots/05-point-of-no-return.jpg) |
+### Archived MEDA weather
 
-| EVA flyover | Slope hazard |
-|---|---|
-| ![Wrist display during the EVA flyover](docs/screenshots/06-eva-wrist-display.jpg) | ![Slope-hazard layer](docs/screenshots/07-slope-hazard.jpg) |
+**JEZERO WEATHER · MEDA** opens from Data layers and the planner. Archived sols 70 and 71 contain temperature, pressure, relative humidity over ice and wind observations. The drawer provides sensor selection, interval selection, timestamps, five-minute trend summaries, quality exclusions and scientific provenance.
 
-| Drop a pin, route there | O₂ runs out: EV1 lost |
-|---|---|
-| ![Dropped-pin card with ROUTE HERE](docs/screenshots/12-drop-pin.jpg) | ![EV1 frozen in red where the suit ran out of oxygen, with the mayday light-time](docs/screenshots/11-o2-exhausted-map.jpg) |
+MEDA is not live weather, a forecast or a terrain-wide environmental map. Missing observations stay missing. The archive's observation sol is separate from the simulated mission clock and does not change the EVA calculation.
 
-### 4. Helmet view
+### DONKI solar advisory
 
-Press **`F`**, **◉ HELMET VIEW**, or **STAND HERE** on a pin to stand on the terrain at 1.8 m eye height, with no vertical exaggeration.
+NASA DONKI provides a separate WSA-ENLIL CME advisory. It is not the source of MEDA measurements. Unavailable responses are not interpreted as no solar activity. Caching, cooldowns and manual retry avoid bypassing rate limits. The advisory is excluded from the EVA verdict.
 
-- **Real horizon.** The skyline isn't painted. For every compass bearing, Aero Atlas marches the CTX crater elevation model outward (allowing for the curve of Mars) and keeps the highest angle. The crater rim and the delta sit exactly where they would for someone standing there.
-- **Mars sky.** A dusty butterscotch sky with the Sun at its real position for the chosen local time. Around the Sun there is the blue glow Perseverance photographs at sunset, and distant ground fades into haze.
-- **The suit is on the clock.** Walking speed follows the slope, and the suit burns O₂ by the same Pandolf metabolic model the planner uses, under a time warp shown on screen. The helmet HUD shows O₂ left, metabolic power, O₂ burn rate, position, slope underfoot and distance to the airlock, plus a compass with bearings to your stops.
-- **Overlays still work.** Switch on slope hazard or contours and they paint onto the ground in front of you.
-- **Ride along.** Start the EVA simulation in the helmet and you walk the route as EV1. If the plan runs out of oxygen, the view collapses where it happens.
+### Mineral Science
 
-| Slope hazard as a helmet overlay | O₂ exhausted, in the helmet |
-|---|---|
-| ![Slope-hazard layer seen from eye level](docs/screenshots/09-helmet-slope-overlay.jpg) | ![Helmet view after the suit runs out of oxygen](docs/screenshots/10-helmet-o2-exhausted.jpg) |
+The cited reading panel distinguishes orbital and rover evidence about carbonates, olivine and water alteration. It does not place unverified mineral catalogue records on the terrain or claim confirmed sampling sites throughout the zone.
 
----
+## Architecture
 
-## What's new in the polish build
+The core is a client-side JavaScript application built by Vite. Three.js renders the scene; HTML/CSS provides the HUD. Prepared scientific assets are served statically. An optional Netlify function supports the DONKI proxy; it is not required for terrain, MEDA archive access or local Journal storage.
 
+<<<<<<< HEAD
 | Feature | Why it matters |
 |---|---|
 | **O₂-exhaustion point** on the route, in the profile and in the simulation | You see *where* a bad plan kills the astronaut, not just that it's NO-GO |
@@ -190,10 +188,45 @@ NASA map products are obtained through the USGS Astrogeology public `asc-pds-ser
 - NASA DONKI (Space Weather Database Of Notifications, Knowledge, Information; Community Coordinated Modeling Center, NASA Goddard), via the NASA API portal: WSA-ENLIL CME simulations for the last 30 days, fetched live when the app opens. The Watney check and the mission clock show any CME forecast to reach Mars within three days (advisory). On 13 Nov 2026: a 726 km/s CME launched 9 Nov, forecast to glance Mars at 12:00 UTC on 13 Nov; nine CMEs forecast to reach Mars in the 30 days before.
   https://api.nasa.gov (DONKI → WSAEnlilSimulations)
 - Published NASA mission results used as typical values (labelled "not live" in the app): Perseverance MEDA weather ranges; Curiosity RAD surface radiation dose (Hassler et al. 2014, Science).
+=======
+```mermaid
+flowchart TB
+  Sources[Mission imagery, elevation and MEDA products] --> Pipeline[Python terrain pipeline and Node archive builder]
+  Pipeline --> Assets[public/data: images, heightmaps, metadata and JSON]
+  Assets --> Loader[Asset loading and validation]
+  Loader --> App[Application controller]
+  App --> Globe[OrbitView]
+  App --> Terrain[Crater and Marswalk TerrainView]
+  Terrain --> Planner[A-star routing and EVA model]
+  Planner --> Playback[EV1 playback]
+  Terrain --> Helmet[First-person exploration]
+  Playback --> Journal[Journal recorder and review]
+  Helmet --> Journal
+  Journal --> DB[(IndexedDB)]
+  Journal --> Report[Canvas2D PNG export]
+  App --> HUD[HUD and science panels]
+  Assets --> MEDA[Archived MEDA client]
+  MEDA --> HUD
+  NASA[NASA DONKI] --> Proxy[Optional serverless proxy]
+  Proxy --> Cache[Advisory client and cache]
+  NASA --> Cache
+  Cache --> HUD
+>>>>>>> f2e5999045dd295d4db076c32c89edefdc9071dc
 ```
 
-### Space agency partner and other sources
+| Subsystem | Responsibility |
+| --- | --- |
+| `src/main.js`, `src/config.js` | Application lifecycle, view transitions and feature configuration. |
+| `src/core/` | Assets, graphics quality, transitions and presentation coordination. |
+| `src/orbit/` | Planet rendering, orbital overlays and shaders. |
+| `src/terrain/` | Terrain meshes, pins, pathfinding, EVA budgeting and helmet view. |
+| `src/ui/` | HUD, controls, profiles, readiness and science drawers. |
+| `src/lib/` | Geography, Mars time, MEDA validation and DONKI handling. |
+| `src/journal/` | Recording state, storage, replay and report composition. |
+| `scripts/` | Scientific-data preparation and regression tests. |
+| `netlify/functions/` | Optional server-side DONKI integration. |
 
+<<<<<<< HEAD
 ```
 - ESA Mars Express, HRSC (High Resolution Stereo Camera; ESA/DLR/FU Berlin): elevation models of the Jezero and Isidis region, used through the USGS "Mars HRSC MOLA Blended DEM Global 200m v2" (Fergason, Hare & Laura 2018), which merges HRSC stereo DTMs with NASA's MOLA. Relief and elevation colours on the globe when zoomed in on Jezero (200 m instead of MOLA's 463 m).
   https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif
@@ -201,294 +234,222 @@ NASA map products are obtained through the USGS Astrogeology public `asc-pds-ser
 - Scientific references: Pandolf, Givoni & Goldman (1977), load-carriage metabolic equation, used for the EVA oxygen model; Tobler's hiking function (walking speed vs slope); Mangold et al. (2021), Science, Jezero delta geology.
 - Software: three.js (MIT licence), Vite (MIT). Python: rasterio, NumPy, Pillow, SciPy. Fonts: Rajdhani, Orbitron, JetBrains Mono (SIL Open Font Licence, via Fontsource).
 - Our own assumptions (labelled in the app): proposed crew landing zone LZ-A, suit oxygen capacity 0.60 kg with a 25 % reserve, 20° walking-slope limit, approximate positions of some named places.
+=======
+## System flow
+
+```mermaid
+flowchart TD
+  Open[Open Aero Atlas] --> Globe[Explore the Mars globe]
+  Globe --> Crater[Descend to Jezero]
+  Crater --> Layers[Inspect layers, landmarks and science]
+  Layers --> Site[Enter Marswalk zone]
+  Site --> Goal[Choose mission goal and assumptions]
+  Goal --> Budget[Compute route and resource budget]
+  Budget --> Review{Revise the plan?}
+  Review -->|Yes| Goal
+  Review -->|No| Walk[Run EV1 or enter helmet view]
+  Walk --> Record[Record movement and add notes]
+  Record --> Save[End and save mission]
+  Save --> History[Review history and replay]
+  History --> Export[Export mission report]
+  Layers --> Weather[Inspect archived MEDA weather]
+  Site --> Weather
+>>>>>>> f2e5999045dd295d4db076c32c89edefdc9071dc
 ```
 
----
+Scientific observations provide context, editable assumptions produce modeled plans, and simulation samples produce recorded missions. These are separate data streams. The Journal does not turn a planned route into completed movement, and the weather drawer does not turn a historical rover sol into the current mission time.
 
-### Dataset processing
+## Technology stack
 
-| App feature | NASA data | Processing (in `scripts/build_data.py`) |
-|---|---|---|
-| Globe colour | Viking MDIM 2.1 (NASA Ames colour) | Resampled to 2k / 4k / 8k by device |
-| Regional relief around Jezero and Isidis | ESA Mars Express HRSC + MGS MOLA blended DEM, 200 m (USGS) | 12° × 12° window read at full resolution, averaged to 2048², normal map and elevation ramp |
-| Globe relief, elevation colours | MGS MOLA 128/64 ppd DEM | Normal map (relief ×18), blue elevation ramp, 1024 × 512 elevation grid for readouts |
-| Globe geologic map, unit readout | USGS SIM 3292 Geologic Map of Mars (USGS-NASA Planetary Geologic Mapping Program) | `geology` stage: official 64 ppd colour map → 4096 × 2048; coded 32 ppd unit raster → 2880 × 1440 lookup grid (`g_geo_units.png`); each unit's colour and symbol in `manifest.json`. Names and ages from the map's legend and pamphlet Table 1 (`src/data/geology.js`) |
-| Human Exploration Zones on the globe | NASA 2015 human landing-site workshop (USGS compilation) | `zones` stage: the 38 primary zone centres (alternate centres dropped) into `manifest.json` → `zones`; drawn in the globe shader as 100 km rings |
-| Night thermal / ground firmness | Mars Odyssey THEMIS night IR 100 m | Clipped to ±54° (streaky edges), gentle contrast curve, orange ramp |
-| Crater imagery | MRO CTX 5 m orthomosaic (JPL) | 4096 × 4658 px (~22 m/px), tinted with the Viking colour of the same ground |
-| Crater terrain, slope, contours | MRO CTX 20 m DEM (JPL) | 1024 × 1164 height grid; slope from the full 20 m DEM |
-| Marswalk zone imagery | MRO HiRISE 25 cm TRN orthomosaic | 6 × 6 km cut, 4096² px (~1.5 m/px), seams flattened, tinted |
-| Marswalk zone terrain, slope, routes, profile | MRO HiRISE 1 m TRN DTM | 1024² height grid; slope at 2.9 m; A* route grid 512² |
-| Space weather at Mars (live) | NASA DONKI WSA-ENLIL simulations (api.nasa.gov) | Not stored. `src/lib/spaceweather.js` fetches the latest runs directly from NASA DONKI (DEMO_KEY) and keeps the latest forecast per CME with a Mars entry in `impactList` |
-| Perseverance traverse | Mars 2020 end-of-drive waypoints (NASA/JPL MMGIS) | 555 points (last fix of each sol), sol 0–2022, stored in `public/data/m20_traverse.json` by the `traverse` stage |
+| Technology | Purpose |
+| --- | --- |
+| JavaScript ES modules | Application and simulation logic. |
+| Three.js / WebGL / GLSL | Planet, terrain, cameras, paths and graphical overlays. |
+| HTML and CSS | Responsive HUD, controls, panels and dialogs. |
+| SVG | Charts and profiles. |
+| Canvas2D | Report composition and PNG export. |
+| Vite and Node.js | Development server, production build and data tooling. |
+| Python, rasterio, NumPy, Pillow, SciPy | Prepare geospatial assets for browser delivery. |
+| IndexedDB | Local mission history and persistence. |
+| Fetch, AbortController and browser storage | Data retrieval, cancellation and caching. |
+| Netlify Functions | Optional NASA request proxy. |
+| Render | Hosted frontend at the live-demo link above. |
+| Node test runner / Playwright | Unit and browser regression scripts. |
+| Fontsource | Rajdhani, Orbitron and JetBrains Mono fonts. |
 
-### Unused datasets and coverage limitations
+The runtime does not require an LLM service, user-account backend or cloud database.
 
-- **Minerals:** the MRO CRISM archive (NASA PDS) would fill the locked "Minerals" layer.
-- **Minerals, checked 13 Nov 2026:** the USGS bucket has CRISM summary mosaics made for the human Exploration Zones (`pigpen/mars/Human_EZs/CRISM_MTRDRs`), but only two scenes touch Jezero (FRT00005850 and FRT000066A4, 2007). They cover the southern and eastern crater floor, miss the delta, Three Forks and Séítah, and their mineral browse products show almost no signal there. Not used: a layer from them would look like noise. The well-known Jezero delta scenes are on the PDS Geosciences Node (ODE), not reachable from the build machine.
-- **Weather:** Perseverance MEDA data is published on NASA's PDS Atmospheres Node, months after collection. There is no live public feed, so the app shows typical values labelled "not live".
+## Scientific interpretation and limitations
 
----
+- CTX supplies crater-scale imagery and elevation; HiRISE supplies higher-resolution local products. Source resolution is not identical to the browser mesh or texture resolution after resampling.
+- THEMIS night infrared is a surface-property proxy, not a direct bearing-strength measurement.
+- MEDA sols 70–71 are historical observations, with different sensor coverage and explicit gaps.
+- DONKI is optional and may be rate-limited; it does not alter the readiness verdict.
+- The metabolic model adapts published relationships using explicit suit and Mars-gravity assumptions. It is not certified for real astronaut operations.
+- Radiation uses reference context rather than a live Jezero dosimeter.
+- The mineral panel provides cited interpretation, not a verified map of arbitrary sample locations.
+- Browser history is local; device performance and browser capabilities affect the experience.
 
-## The science behind the numbers
+## Screenshot walkthrough
 
-| Feature | How it's calculated | Checked against |
-|---|---|---|
-| Mars clock | NASA GISS **Mars24** algorithm (Allison & McEwen 2000) | Mars24 reference date; Perseverance landing = sol 0 |
-| Earth–Mars signal delay | JPL approximate planetary positions (Keplerian elements, 1800–2050) | 11 min 22 s on landing day, 18 Feb 2021, matching NASA's figure |
-| Sun and shadows | Solar declination and hour angle for Jezero; shadows ray-marched through the elevation model on the GPU | Sunrise and sunset shown in the HUD |
-| Safest route | A* search on a 512 × 512 grid from the HiRISE DTM. Step cost is **metabolic energy**, so the route minimises oxygen; cells steeper than the walking limit are avoided | Default loop solves in under 40 ms |
-| Walking cost | **Pandolf et al. (1977)** load-carriage equation, scaled to Mars gravity (0.38 g) with a pressure-suit penalty; Tobler-style speed vs. grade; 1 L O₂ ≈ 20.1 kJ | Flat walking at 0.9 m/s ≈ 293 W ≈ 0.075 kg O₂ per hour, the same rate our 0.60 kg / 8 h suit assumption is sized on |
-| Point of no return | First point on the way out where O₂ used so far + O₂ to walk straight back (plus a 25 % detour allowance) would eat into the reserve | Default loop: 0.30 kg suit → PNR at 3.92 km, 0.25 kg → 3.23 km (both on the leg to Three Forks) |
-| O₂ runs out | The EVA's walk/stop timeline carries cumulative O₂; the first moment it reaches the tank size gives the time and place | 0.20 kg suit on the default loop: O₂ out at 6.38 km, 2 h 41 min in, 2.86 km from the airlock |
-| Rover and walkback | Rover legs at 5 km/h with the crew seated (150 W). The walkback check is the point-of-no-return test applied to the whole drive, home leg included: O₂ used so far + O₂ to walk straight home (25 % detour allowance) must stay above the reserve | Default loop with a 0.30 kg suit: NO-GO on foot (PNR at 3.92 km), READY by rover (closest call 0.19 of 0.23 kg). With 0.20 kg: walkback limit at 3.90 km |
-| Radiation dose | EVA time × the surface dose rate Curiosity's RAD measured, 0.64 mSv per day (Hassler et al. 2014). A suit adds little shielding against cosmic rays | Default loop: ≈ 0.11 mSv, against NASA's 600 mSv career limit |
-| Storm shelter | Longest straight walk back to the airlock from any point on the route, at flat walking speed with the PNR's 25 % detour allowance: how long the crew is exposed if a solar-storm warning comes in | Default loop: ≤ 1 h 40 min, worst at Three Forks (4.61 km) |
-| Mayday delay | One-way and round-trip light time from the same Earth–Mars model as the header clock | ~14 min one way on 25 Sep 2026 |
-| Helmet skyline | For each of 360 bearings, march the CTX DEM from 2.6 to 46 km and keep the highest elevation angle, after subtracting the curvature drop d²/2R | Highest skyline 4.5° toward bearing 263° (the western rim and delta) |
-| Elevations | Heights decoded from the DEMs | Three Forks: −2,545 m in the HiRISE DTM vs −2,545.3 m rover elevation at the tube drops in NASA's PDS depot archive |
+These 12 supplied screenshots show the Aero Atlas interface on 15 November 2026. Readings and verdicts reflect the selected route, time and settings in each capture.
 
-Default EVA assumptions, all editable in the planner: 75 kg astronaut, 58 kg suit and backpack, no extra science kit (0–30 kg slider, added to the load in the walking model: 20 kg raises the default loop from 0.30 to 0.38 kg of O₂), 0.60 kg usable O₂ (about 8 h), 25 % reserve, 20° walking-slope limit, 20 min per science stop.
+### Mars globe
 
-The default plan (LZ-A → Octavia E. Butler Landing → Three Forks → Séítah → LZ-A) comes out at **9.75 km, 4 h 02 min, 0.30 kg of O₂, 50 % margin: MARSWALK READY**.
+![Mars globe](docs/screenshots/team-4-loops/01-mars-globe.png)
 
-| Mission goal | Stops (from and back to LZ-A) | Route | O₂ | Call |
-|---|---|---|---|---|
-| Grand tour | Landing site, Three Forks, Séítah | 9.75 km | 0.30 kg | READY |
-| Bring the samples home | Three Forks | 8.74 km | 0.24 kg | READY |
-| Date the crater floor | Séítah | 5.46 km | 0.16 kg | READY |
-| Look for signs of ancient life | Delta front | 9.30 km | 0.26 kg | CAUTION (steep sections up to 17° on the delta) |
+The globe establishes Jezero’s location, other landing sites, orbital data layers and mission-clock context.
 
----
+### Crater elevation
 
-## Places on the map
+![Crater elevation](docs/screenshots/team-4-loops/02-crater-elevation.png)
 
-| Place | Position | Notes |
-|---|---|---|
-| Octavia E. Butler Landing | 18.4447°N 77.4508°E | Perseverance touchdown, 18 Feb 2021 |
-| Three Forks Sample Depot | 18.4528°N 77.4082°E | 10 sample tubes laid sols 653–690 (Dec 2022 – Jan 2023) at the foot of the delta. Mean of the rover positions at each tube drop, from NASA's PDS Three Forks Depot archive |
-| Séítah | 18.4339°N 77.4430°E | Where Perseverance parked on Séítah's edge, sols 248–278, and cored Coulettes (sol 271). NASA/JPL MMGIS waypoints |
-| Delta front | 18.4589°N 77.4061°E | Where Perseverance parked on the delta front, sols 477–502, and cored Skyland (sol 495). NASA/JPL MMGIS waypoints |
-| LZ-A, crew landing zone | 18.4500°N 77.4850°E | **Our proposal**, not a NASA site: flat lava floor, over 4 km from the depot so engine blast can't reach it |
-| Western Fan (delta), Belva crater, Neretva Vallis, Pliva Vallis, crater rim | approx. | Crater-view labels, placed by eye on the CTX mosaic |
-| Acidalia Planitia "Ares III" | 31.2°N 28.5°W | Fiction: Mark Watney's base in *The Martian* (Andy Weir) |
+The blue elevation ramp exposes the crater basin and surrounding relief, with the gold rover traverse and named landmarks.
 
----
+### Slope hazard
 
-## Controls
+![Slope hazard](docs/screenshots/team-4-loops/03-slope-hazard.png)
 
-| | Orbit | Crater / Marswalk zone |
-|---|---|---|
-| Drag | spin the planet | orbit the camera |
-| Right-drag or Shift-drag | | pan |
-| Scroll | zoom; locks onto Jezero when close | zoom toward the cursor. Keep scrolling out to go up a level |
-| Click | Jezero, or the lock-on, to descend | the Marswalk zone to enter it. In the zone, click anywhere to **drop a pin** (ROUTE HERE / ADD STOP / STAND HERE), or click a named place to add it as a stop |
-| Keys | `1`–`4` layers · `Z` Exploration Zones · `G` grid · `Space` rotation · `Enter` descend | `1`–`7` layers · `WASD` pan · `Enter` enter zone · `Esc` go up · `Space` run the EVA simulation · `F` helmet view |
-| Anywhere | `C` autopilot · `H` hide HUD · `K` captions on/off · `M` sound · `R` record | |
-| Touch | drag to spin · pinch to zoom · tap Jezero to descend | drag to orbit · pinch to zoom · two-finger drag to pan · tap to select |
+Colour classes distinguish gentler and steeper terrain before route selection. This is slope classification, not a complete physical-hazard assessment.
 
-**Helmet view:** drag to look · `WASD` / arrows to walk (`Shift` = faster) · `Q`/`E` turn · click or tap a spot to walk there · scroll or pinch to zoom · `[` `]` or the − / + buttons change the time warp · `Esc` or `F` to leave.
+### Ground-firmness proxy
 
-**Helmet view on phones:** turn the phone sideways (on Android it goes fullscreen and locks to landscape). The **left stick walks**: a light push is a slow walk, full push jogs. The **right stick looks around**. You can still tap a spot to walk there.
+![Ground-firmness proxy](docs/screenshots/team-4-loops/04-ground-firmness.png)
 
-On desktop, each side panel has a small **‹ / ›** tab on its inner edge that tucks it away; the tab stays at the screen edge to bring it back, and the choice is remembered.
+THEMIS night infrared provides thermal context. The loose-dust-to-firm-rock legend is a proxy rather than a direct strength measurement.
 
-On phones and upright tablets, the side panels open as a sheet from the tabs at the bottom of the screen (**JEZERO / CRATER / PLANNER** and **LAYERS**). Tap the map to close the sheet.
+### Contours and traverse
 
----
+![Contours and traverse](docs/screenshots/team-4-loops/05-contours.png)
 
-## Phones, tablets and performance
+Contour lines expose relief while the bundled Perseverance traverse remains visible. The pictured legend uses 50 m intervals and stronger lines every 250 m.
 
-Aero Atlas picks a quality level for each device when it loads. You can force one by adding it to the URL:
+### Holographic terrain
 
-| Level | Chosen for | What changes | Force it with |
-|---|---|---|---|
-| High | desktops and laptops | 8k globe, full-resolution terrain, up to 2× sharpness | `?q=high` |
-| Medium | tablets, 4-core or low-memory laptops | 4k globe, full terrain, up to 1.5× sharpness | `?q=medium` |
-| Low | phones | half-resolution textures (about 11 MB download instead of 40 MB), terrain meshes with 4× fewer points, 30 fps cap, no screen overlays | `?q=low` |
+![Holographic terrain](docs/screenshots/team-4-loops/06-holographic-terrain.png)
 
-On every level:
-- **Adaptive resolution** lowers the render resolution when frames get slow and raises it again when there's headroom.
-- **Shadows** are baked into a texture only when the sun or the relief changes, instead of being re-calculated for every pixel on every frame.
-- Everything is decoded, compiled and uploaded behind the loading screen, so the zoom transitions never stall on first use.
+The gold technical display retains terrain shape, named features, the rover traverse and the Marswalk entry point.
 
----
+### MEDA archived observations
 
-## Recording the pitch video
+![MEDA archived observations](docs/screenshots/team-4-loops/07-meda-observations.png)
 
-Press **`C`** (or **▶ AUTOPILOT**) for a scripted fly-through of about two minutes, with captions. It follows the WHAT and SO WHAT sections of our pitch script:
+Sol 70 at 04:00–04:05 LMST shows temperature, pressure and humidity samples. Wind is correctly labeled unavailable in this interval.
 
-1. Orbit, then the MOLA, THEMIS and geologic-map layers, and NASA's proposed human Exploration Zones (Jezero sits inside one).
-2. Lock onto Jezero and descend.
-3. Crater: elevation and contours, ground firmness, slope hazard.
-4. Marswalk zone: the safest route.
-5. Perseverance's real drive path across the crater.
-6. "What if the suit carried only 0.20 kg of O₂?" The point of no return appears and the call is NO-GO. "And if they walk anyway?" EV1 stops in red where the O₂ runs out, and the mayday light-time appears.
-7. EVA flyover with the wrist display.
-8. Pick Three Forks: the route draws and **MARSWALK READY** shows.
-9. Holo-mode end card.
+### MEDA trends
 
-Tips:
-- Press `K` to hide the captions if you're recording your own voiceover, and `H` to hide the HUD for clean B-roll.
-- **■ STOP AUTOPILOT** (dimmed during the run), `Esc`, or any click or scroll on the map hands control back to you. Stopping puts back whatever the autopilot changed (O₂ setting, layers, plan).
-- **Built-in recorder:** press **● REC** (or `R`), choose *this tab* and allow audio, then press `C`. The controls hide during the autopilot, so the take is clean. Press `R` again (or the browser's *Stop sharing*) and a `.webm` downloads. Desktop Chrome or Edge works best.
-- Or record at 1920 × 1080 with OBS, or with the Xbox Game Bar (`Win + Alt + R`).
+![MEDA trends](docs/screenshots/team-4-loops/08-meda-trends.png)
 
----
+The temperature plot shows five-minute means and ranges. Blank intervals are not interpolated; the selected interval connects chart and cards.
 
-## Run it locally
+### Mineral Science
 
-You need [Node.js](https://nodejs.org) 20 or newer and a desktop browser with a graphics card (Chrome, Edge or Firefox).
+![Mineral Science](docs/screenshots/team-4-loops/09-mineral-science.png)
+
+The reading panel separates orbital carbonate evidence from rover evidence and explains limitations on placing mineral detections.
+
+### Marswalk route and readiness
+
+![Marswalk route and readiness](docs/screenshots/team-4-loops/10-marswalk-planner.png)
+
+The cyan route connects science stops. Readiness explanations, oxygen reserve and an elevation profile help assess the modeled plan.
+
+### Helmet view
+
+![Helmet view](docs/screenshots/team-4-loops/11-helmet-view.png)
+
+Ground-level exploration retains route guidance alongside oxygen, metabolic power, navigation, slope and time-warp controls.
+
+### EVA playback
+
+![EVA playback](docs/screenshots/team-4-loops/12-eva-playback.png)
+
+EV1 advances along the planned route. The planner and wrist panel show progress, next-stop distance and simulated oxygen.
+
+## Run locally
+
+Use Node.js 22.12+ in the Node 22 release line and npm. Keep the prepared `public/data/` assets alongside the application. Python is needed only for rebuilding scientific data.
 
 ```bash
-git clone https://github.com/ayankrmondal2003-rgb/AeroAtlas
-cd AeroAtlas
-npm install
-npm run dev          # opens http://localhost:5173
+npm ci
+npm run dev
 ```
 
-The processed NASA data is already in the repo (`public/data/`, about 40 MB), so you don't need Python to run the app.
-
-Quality is picked automatically; see [Phones, tablets and performance](#phones-tablets-and-performance) to force a level.
-
-Production build:
+Open the URL printed by Vite. For a production build:
 
 ```bash
-npm run build        # static site in dist/
-npm run preview      # serve dist/ at http://localhost:4173
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4175
 ```
 
----
+Serve the application over HTTP locally or HTTPS when hosted rather than opening `index.html` directly. Append `?q=low` for a lower rendering preset where supported.
 
-## Testing and maintenance
+## Deployment
 
-The smoke test requires Playwright and its Chromium browser, available to Node. Build with `npm run build`, then keep `npm run preview -- --port 4173` running in a separate terminal. In PowerShell, with Playwright installed globally:
+**Live application: [https://aeroatlas.onrender.com](https://aeroatlas.onrender.com)**
 
-```powershell
-$env:NODE_PATH = npm root -g
-node scripts/smoke.cjs
-$env:DEVICE = "iPhone 14"
-node scripts/smoke.cjs
-Remove-Item Env:DEVICE
-```
+The frontend build is published from `dist/`. The repository's Render configuration describes static hosting. Netlify functions are optional and are not executed by a Render static service. On a Netlify deployment, a server-side `NASA_API_KEY` can support the DONKI proxy; never include a private key in browser code. Advisory availability remains independent of terrain exploration.
 
-The test uses software WebGL and stubs NASA DONKI requests; real phone/GPU testing is still needed for frame rate, touch controls and landscape behavior. Recording needs a real browser tab-capture session. Do not repeatedly call the live NASA API from automated tests.
-
-`src/main.js` owns transitions between orbit, crater and site scenes. Terrain scenes use kilometres; orbit uses a planet radius of 1. Feature switches are in `src/config.js`. In the browser console, `window.solAtlas` exposes the application for debugging.
-
-Maintenance details that prevent regressions:
-
-- Data URLs use the hash-aware loader in `src/core/assets.js`; preserve cache invalidation when updating processed maps.
-- Height PNGs encode 16-bit heights in red and green; ImageBitmap textures are already flipped during decoding.
-- Build interactive DOM elements once rather than replacing them every frame. Labels create stacking contexts, so overlays need the correct parent z-index.
-- Bake terrain shadows only when lighting or exaggeration changes. Keep per-frame work allocation-free where possible.
-- The helmet view uses a 0.0018 km eye height and 0.0004 km near plane; map and helmet route lifts differ.
-- Autopilot changes must be restored on stop, and transitions awaited so cancellation takes effect promptly.
-
----
-
-## Rebuild the NASA data
-
-`scripts/build_data.py` downloads the source data from the public USGS Astrogeology archive (`asc-pds-services` on AWS S3) and bakes the textures and heightmaps in `public/data/`. It streams only the parts it needs. For example, the largest source is a 3.4 GB HiRISE mosaic, and the script reads just the 6 × 6 km zone.
+## Data preparation
 
 ```bash
-pip install rasterio numpy pillow scipy
-npm run data                           # everything (a few minutes)
-python3 scripts/build_data.py crater   # or one stage: global | region | crater | site | lite
+python -m pip install rasterio numpy pillow scipy
+python scripts/build_data.py
+node scripts/build_meda.mjs
 ```
 
-Downloads are cached in `.cache/`, which is git-ignored. The `lite` stage writes the half-resolution phone textures to `public/data/lite/` and a 4k globe map for medium-quality devices. Heightmaps are stored as PNG images: each 16-bit height is split across the red and green channels (height = R × 256 + G), so any static web host can serve them without loss.
+These are maintenance operations requiring source access, time and storage, not normal startup steps. The terrain pipeline crops and resamples mission data into browser-ready textures and heightmaps. The MEDA builder prepares a pinned archive subset with provenance and checksums. Preserve original observations and review source-version changes before regeneration.
 
----
+## Testing
 
-## Deploy to Render (100% Free Tier)
-
-AeroAtlas is configured as a **Render Static Site**, which is **completely free forever** on Render's Free tier:
-- **No spin-down / sleep delays:** Unlike free Web Services which shut down after 15 minutes of inactivity and take 50s+ to wake up, Render Static Sites run directly from Render's global CDN and are **instant 24/7**.
-- **No credit card required:** Render Static Sites do not require a payment method.
-- **Resource conservation:** Fast builds (~10s) conserve your monthly 500 build minutes, and aggressive caching preserves the 100 GB/month bandwidth limit.
-
-### Option 1: Deploy with Render Blueprint (Recommended)
-
-1. Push your repository to GitHub (`main` branch).
-2. Go to the [Render Dashboard](https://dashboard.render.com).
-3. Click **New +** -> **Blueprint**.
-4. Connect your GitHub repository (`AeroAtlas`).
-5. Render will detect [`render.yaml`](render.yaml) and configure the Free Static Site automatically.
-6. Click **Apply**. Render will build and launch your site at a free `*.onrender.com` address.
-
-### Option 2: Manual Free Static Site Setup
-
-1. Go to [Render Dashboard](https://dashboard.render.com) -> **New +** -> **Static Site**.
-2. Connect your GitHub repository.
-3. Fill in the build settings:
-   - **Name:** `aeroatlas` (or your chosen name)
-   - **Branch:** `main`
-   - **Root Directory:** (leave blank if repo root, or `AeroAtlas` if in a subfolder)
-   - **Build Command:** `npm install --no-audit --prefer-offline && npm run build`
-   - **Publish Directory:** `dist`
-4. Under **Redirects/Rewrites**:
-   - Add a rewrite rule: Source `/*` -> Destination `/index.html` (Action: `Rewrite`).
-5. Click **Create Static Site**.
-
-`dist/` also works on GitHub Pages or any other static host, because all asset and data paths are relative.
-
----
-
-## Project structure
-
-```
-index.html              HUD skeleton (panels, loader, overlays)
-render.yaml             Render Blueprint configuration (build, publish, headers, SPA rewrite)
-.node-version           Node.js runtime version for Render (Node 22)
-vite.config.js          Vite config (relative base path)
-src/
-  main.js               app: level transitions (orbit ⇄ crater ⇄ zone), input, render loop
-  styles.css            HUD styling
-  orbit/                Mars globe: planet shader (layers, zoom-in detail, relief, lock-on rings),
-                        atmosphere, moons, stars
-  terrain/              TerrainView: 3D terrain, layer shader, GPU shadows, contours, holo mode, traverse, camera
-                        Planner: stops, A* routes, EVA budget, point of no return, O₂-out point, EVA flyover
-                        FirstPerson: helmet view (sky, real skyline, walking, suit HUD, ride-along)
-                        Pin: drop a pin, route here / add stop / stand here
-                        pathfinding.js (A*), eva.js (metabolic + O₂ model)
-  ui/                   HUD panels and legends, elevation-profile chart, labels pinned to 3D points,
-                        sound.js (Web Audio synth), recorder.js (tab → video)
-  lib/                  marstime.js (Mars24, signal delay, sun position), geo.js,
-                        spaceweather.js (live CME forecasts for Mars from NASA DONKI)
-  core/                 asset loader, quality levels + adaptive resolution, scene crossfade, autopilot
-  data/places.js        landing sites, points of interest, default Marswalk plan
-  data/geology.js       USGS SIM 3292 unit names, ages and descriptions
-scripts/build_data.py   NASA/USGS → web data pipeline
-public/data/            processed textures + heightmaps + manifest.json (lite/ = phone versions),
-                        m20_traverse.json (Perseverance end-of-drive waypoints, sol 0–2022)
-docs/screenshots/       images used in this README
-scripts/smoke.cjs       Playwright smoke test (desktop or DEVICE="iPhone 14")
+```bash
+node --test scripts/test-meda.mjs scripts/test-spaceweather.mjs scripts/test-readiness.mjs scripts/test-journal.mjs
+node scripts/test-startup.cjs
+npm run build
 ```
 
----
+Browser regression scripts under `scripts/` use Playwright and a compatible Chromium installation supplied by the test environment. They cover weather, planner, Mineral Science, Journal and report interactions. Start a local server first; test scripts support `URL` and `CHROMIUM_PATH` overrides where defined. Test availability follows the checked-out source version. This documentation update does not claim a fresh application regression pass.
 
-## Limitations and roadmap
+## Controls and suggested walkthrough
 
-**Known limitations in phase 1**
-- Only Jezero is unlocked.
-- The CRISM mineral layer and live MEDA weather aren't in yet.
-- Some place positions are approximate (see [Places](#places-on-the-map)).
-- Routing does not model individual boulders below the routing grid resolution; rock roughness hazards and two-person EVA remain future work. Thermal brightness is a ground-firmness proxy, not a direct bearing-strength measurement.
-- The EVA model is a planning estimate, not flight-certified. Its assumptions are listed in the planner.
-- The helmet view's close-up pebbles and grain are procedural. HiRISE resolves 25 cm, so anything smaller is decoration, and the terrain mesh is sampled every ~5 m.
-- The traverse is a snapshot of NASA's feed (sol 2022, October 2026; on 13 Nov 2026 the feed still ended there). `python3 scripts/build_data.py traverse` refreshes it.
-- Space weather is a forecast for Mars as a whole, from NASA's model. It does not include solar particle events measured at Mars.
+1. Launch the live demo and descend from the globe to Jezero.
+2. Compare elevation, slope, thermal context and contours.
+3. Enter the Marswalk zone, select a goal and adjust stops and assumptions.
+4. Read the readiness explanation, return margin and elevation profile.
+5. Inspect MEDA observations independently of the simulated mission clock.
+6. Run EV1 playback or enter helmet view with the on-screen control or F.
+7. Start Journal recording, move and add notes, then end the recording.
+8. Review saved history and export a mission report.
 
-**Next**
-- More sites, including ice-rich plains from NASA's SWIM ice-mapping project.
-- CRISM minerals.
-- Live MEDA weather.
-- Dust-storm alerts from orbit. Space-weather alerts for CMEs are in (NASA DONKI); solar energetic particle alerts would be the next step.
-- An offline mode for suits and rovers.
+Drag and scroll control the orbital/terrain camera; right-drag pans where supported. Number keys select available layers. Escape closes dialogs or moves up according to context. Mobile uses the on-screen Planner/Crater and Layers sheets. Follow the current in-app hints for movement and shortcuts.
 
----
+## Repository structure
 
+```text
+AeroAtlas/
+├── README.md                   Main project documentation
+├── PROJECT_DESCRIPTION.md      Short project description
+├── src/
+│   ├── main.js                 Application coordination
+│   ├── core/                   Assets and presentation
+│   ├── orbit/                  Planetary visualization
+│   ├── terrain/                Terrain, routes, EVA and helmet view
+│   ├── journal/                Recording, storage and reports
+│   ├── ui/                     HUD, charts and science panels
+│   └── lib/                    Time, geography and data clients
+├── public/data/                Prepared scientific assets
+├── scripts/                    Data builders and tests
+├── netlify/functions/          Optional DONKI service
+├── docs/screenshots/team-4-loops/  Current screenshots
+├── docs/README-legacy.md        Archived previous documentation
+└── dist/                       Compiled frontend
+```
+
+## Future work
+
+Potential extensions include more validated exploration regions, broader MEDA archive coverage, clearer uncertainty communication, more complete recording recovery tests and optional portable mission-data exports. These are directions for development, not completed features. Each new science layer should include coverage and provenance before it is presented as evidence.
+
+<<<<<<< HEAD
 ## Credits
 
 **Original team:** The SOL Explorers, NASA Space Apps Challenge 2026, Bangladesh.
@@ -525,3 +486,18 @@ The code in this repository is open source under the [Apache License 2.0](LICENS
 ## Archived MEDA weather
 
 Jezero Weather opens from the crater/Marswalk data panel. It displays verified, locally packaged Perseverance MEDA observations for archived sols 70–71, with separate sensor timestamps, five-minute trend summaries, missing-data states and PDS citations. It is **not live weather** and does not change EVA calculations. See [MEDA_DATA.md](MEDA_DATA.md) for provenance, quality rules, regeneration and tests.
+=======
+## AI use disclosure
+
+Claude Code assisted with the original implementation and data-processing code under human direction. OpenAI Codex assisted with subsequent development, debugging, testing and documentation. The team defines the objectives, reviews features, tests the experience and reports issues.
+
+Scientific inputs are mission datasets and published research, not AI-generated observations. The screenshots are user-supplied captures of the application. AI assistance during development does not imply an AI inference service at runtime.
+
+## Credits and license
+
+**Team 4 Loops:** Arpan Biswas, Ayan Kumar Mondal, Aritra Adak and Aritra Pal.
+
+Data and scientific context are credited to NASA mission teams, NASA/JPL-Caltech, USGS Astrogeology, ESA/DLR/FU Berlin and instrument/research teams. Their names identify sources rather than endorsement. Mission imagery, geological products, fonts and dependencies retain their applicable terms and attribution requirements.
+
+The project code is distributed under [Apache-2.0](LICENSE). The [previous README](docs/README-legacy.md) is retained for historical provenance and detailed original references; its older branding and dated claims are archival, not the main project introduction.
+>>>>>>> f2e5999045dd295d4db076c32c89edefdc9071dc
