@@ -1,5 +1,6 @@
 import './styles.css';
 import { startLoadingVideo } from './ui/intro.js';
+import { Journal } from './journal/Journal.js';
 import * as THREE from 'three';
 import { loadAssets } from './core/assets.js';
 import { fetchSpaceWeather } from './lib/spaceweather.js';
@@ -138,6 +139,7 @@ class App {
     this.pin = new PinTool(this);
     // helmet view (can be switched off in src/config.js)
     this.fpv = FEATURES.helmetView ? new FirstPerson(this) : null;
+    this.journal = new Journal(this);
 
     // Warm up behind the loading screen: compile every shader, upload every texture,
     // bake the first shadows and allocate the transition buffers, so nothing of that
@@ -397,13 +399,13 @@ class App {
     document.addEventListener('gesturestart', (e) => e.preventDefault());
     document.addEventListener('gesturechange', (e) => e.preventDefault());
     window.addEventListener('wheel', (e) => {
-      if (e.target.closest('.panel, .modal, .lbx')) return;
+      if (e.target.closest('.panel, .modal, .lbx, .eva-journal')) return;
       e.preventDefault();
       this.director.interrupt();
       if (!this.busy && !this.fade) this.active?.onWheel(e);
     }, { passive: false });
     window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.closest('input, textarea, select, .eva-journal, [contenteditable="true"]')) return;
       // the data-sources window is open: Esc closes it, nothing else reaches the map
       const modal = document.getElementById('modal');
       if (!modal.hidden) { if (e.key === 'Escape') modal.hidden = true; return; }
@@ -507,6 +509,7 @@ class App {
     if (now - this.readoutAt > 100) { this.readoutAt = now; this.hud.readout(this.fpv?.active ? this.fpv.readout() : v.readout()); }
     if (!this.busy) this.updatePrompts();
     this.director.update(dt);
+    this.journal?.frame(now);
   }
 
   updatePrompts() {

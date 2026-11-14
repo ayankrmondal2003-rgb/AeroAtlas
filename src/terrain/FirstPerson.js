@@ -171,6 +171,7 @@ export class FirstPerson {
     this.o2Used = 0;
     this.walked = 0;
     this.warned = false;
+    this.journalEpoch = (this.journalEpoch || 0) + 1;
     this.clock = v.ltst;
     this.prevExag = v.exagTarget;
     this.active = true;
@@ -206,6 +207,7 @@ export class FirstPerson {
 
   exit() {
     if (!this.active) return;
+    if (!this.app.planner.sim) this.app.journal?.recorder.pause();
     const a = this.app, v = this.view;
     this.active = false;
     this.follow = false;
@@ -341,6 +343,8 @@ export class FirstPerson {
   // ------------------------------------------------------------------ per frame
   update(dt) {
     if (!this.active) return;
+    const journalO2Before = this.o2Used;
+    const journalFreeWalk = !this.follow && !this.dead;
     const a = this.app, v = this.view, pl = a.planner;
     const keys = a.keys;
     let speed = 0, grade = 0;
@@ -447,6 +451,13 @@ export class FirstPerson {
     }
     this.speed = speed;
     this.grade = grade;
+    if (journalFreeWalk) {
+      const elapsed = dt * this.warp;
+      const used = Math.max(0, this.o2Used - journalO2Before);
+      this.app.journal?.feed(this.pos, elapsed, `helmet-${this.journalEpoch}`, 'helmet walk',
+        Math.max(0, pl.params.o2CapKg - this.o2Used), pl.params.o2CapKg,
+        elapsed > 0 ? used / elapsed / o2KgPerSec(1) : null);
+    }
     const cap = pl.params.o2CapKg;
     const lowO2 = 1 - this.o2Used / cap;
     a.sound?.breathing(!this.dead, 13 + speed * 6 + (lowO2 < 0.25 ? 10 : 0));

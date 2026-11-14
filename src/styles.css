@@ -750,3 +750,37 @@ body.compact .panel { background-color: var(--panel-solid); }
 .video-loader .intro-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .video-loader [hidden] { display: none; }
 .video-loader .loader-log:not([hidden]) { position: absolute; left: max(16px, env(safe-area-inset-left)); right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); height: auto; padding: 16px; color: #ffb0b0; background: var(--panel-solid); border: 1px solid var(--critical); border-radius: var(--radius-panel); }
+
+/* EVA Journal: a compact left-side instrument, anchored above the suit in helmet view. */
+.eva-journal { position: fixed; z-index: 11; left: 22px; bottom: 72px; width: 270px; pointer-events: auto; font-size: 13px; }
+.eva-journal .journal-toggle { width: 100%; text-align: left; min-height: 36px; background: var(--panel); }
+.journal-rec { float: right; color: #ff666b; font-family: var(--mono); font-size: 10px; }
+#journal-content { max-height: min(60dvh, 570px); overflow-y: auto; overscroll-behavior: contain; padding: 10px; background: rgba(21,22,25,.94); border: 1px solid var(--line); border-radius: 0 0 var(--radius-panel) var(--radius-panel); box-shadow: var(--shadow-panel); scrollbar-width: thin; }
+@supports (backdrop-filter: blur(4px)) { #journal-content { background: rgba(21,22,25,.86); backdrop-filter: blur(4px); } }
+.eva-journal [hidden] { display: none !important; }
+.journal-tabs, .journal-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.journal-tabs { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.eva-journal .btn { min-height: 34px; padding: 6px 3px; font-size: 10px; letter-spacing: .06em; white-space: normal; overflow-wrap: anywhere; }
+.eva-journal h3 { color: var(--hud-hi); font-size: 12px; letter-spacing: .12em; margin: 12px 0 6px; }
+.eva-journal label { display: block; margin: 8px 0; color: var(--hud-hi); }
+.eva-journal input, .eva-journal select, .eva-journal textarea { display: block; box-sizing: border-box; width: 100%; min-width: 0; margin-top: 4px; padding: 7px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel-solid); color: var(--text); font: inherit; }
+.eva-journal textarea { resize: vertical; min-height: 70px; }
+.journal-summary, .journal-history-summary { white-space: pre-line; color: var(--data); font-family: var(--mono); font-size: 10px; line-height: 1.7; margin: 8px 0; overflow-wrap: anywhere; }
+.journal-message, .journal-storage, .journal-local, .journal-replay-time { font-size: 11px; line-height: 1.4; margin: 8px 0; overflow-wrap: anywhere; }
+.journal-storage, .journal-local { color: var(--text-2); }
+.journal-entry { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.journal-entry strong { color: var(--hud-hi); font-size: 11px; }
+.journal-entry p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0; }
+.journal-entry small { display: block; color: var(--text-3); }
+.journal-entry button { margin-top: 6px; margin-right: 6px; }
+.journal-downloads a { display: block; color: var(--data); overflow-wrap: anywhere; margin: 8px 0; }
+.mk.journal-marker .dot { border-color: #ff555b; background: #ff555b; }
+.mk.journal-marker .lb { color: #ffb4b6; }
+body.compact .eva-journal:not(.journal-helmet) { left: 10px; bottom: calc(64px + env(safe-area-inset-bottom,0px)); width: min(270px,calc(100vw - 20px)); }
+body.compact .eva-journal .btn { min-height: 36px; }
+body.cine .eva-journal { display: none; }
+/* Short landscape screens reserve a left column above the thumb controls. */
+body.fpv.compact.landscape .h-suit { top: auto; bottom: calc(144px + env(safe-area-inset-bottom,0px)); }
+body.fpv.compact.landscape .eva-journal .journal-toggle { min-height: 30px; }
+body.fpv.compact.landscape #journal-content { padding: 6px; }
+

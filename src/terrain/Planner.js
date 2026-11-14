@@ -308,6 +308,7 @@ export class Planner {
     if (!this.result || this.result.failed) return;
     this.stopSim();
     this.sim = { t: 0, speed, pastPnr: false, inReserve: false, dead: false };
+    this.sim.journalEpoch = this.journalEpoch = (this.journalEpoch || 0) + 1;
     this.evaItem.hiddenByUser = !!this.app.fpv?.active;
     this.setEvaLook(false);
     this.app.hud.toast('EVA SIMULATION · EV1 EGRESS');
@@ -389,6 +390,8 @@ export class Planner {
     const s = this.sim, r = this.result;
     const hud = this.app.hud, snd = this.app.sound;
     if (s.dead) return; // frozen where the O₂ ran out until the plan changes or the sim is stopped
+    const journalT = s.t;
+    const journalO2 = s.state?.o2 || 0;
     s.t += dt * s.speed;
     let dies = false;
     if (r.o2Out && s.t >= r.o2Out.t) { s.t = r.o2Out.t; dies = true; }
@@ -404,6 +407,10 @@ export class Planner {
       v.cam.target.z += (pos.z - v.cam.target.z) * Math.min(1, dt * 2.5);
     }
     s.state = st;
+    const journalDt = Math.max(0, Math.min(s.t, r.events.at(-1).t1) - Math.min(journalT, r.events.at(-1).t1));
+    this.app.journal?.feed(pos, journalDt, `sim-${s.journalEpoch}`, this.params.rover ? 'rover' : 'EV1 playback',
+      Math.max(0, this.params.o2CapKg - st.o2), this.params.o2CapKg,
+      journalDt > 0 ? Math.max(0, st.o2 - journalO2) / journalDt / o2KgPerSec(1) : null);
 
     // milestones along the way
     if (r.pnr && !s.pastPnr && st.d >= r.pnr.d) {
