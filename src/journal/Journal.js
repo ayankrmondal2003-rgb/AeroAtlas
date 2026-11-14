@@ -17,12 +17,14 @@ export class Journal {
     try {
       const saved=await this.store.list();
       for(const m of saved) {if(active(m)){m.status='Interrupted';m.finalized=false;}if(!this.history.has(m.id))this.history.set(m.id,m);}
+      const unfinished=[...this.history.values()].filter(m=>m.status==='Interrupted'&&!m.finalized);
+      if(unfinished.length)this.message.textContent=`Recovered ${unfinished.length} unfinished mission(s). Open HISTORY to review and finalize; no movement is reconstructed.`;
       this.storageError=null;this.loaded=true;
     } catch(error) {this.storageError=error.message;this.loaded=true;}
     this.refresh();
   }
   async save() {
-    if(this.saving||!this.dirty||!this.recorder.mission)return;
+    if(this.saving||this.storageError||!this.dirty||!this.recorder.mission)return;
     this.saving=true;this.dirty=false;const snapshot=structuredClone(this.recorder.mission);
     this.history.set(snapshot.id,snapshot);this.refreshStorage();
     try {await this.store.save(snapshot);this.storageError=null;this.saved=true;}
@@ -48,7 +50,7 @@ export class Journal {
     const planned=(a.planner.result?.route||[]).map(p=>({...p,...a.site.xzToLonLat(p.x,p.z)}));
     this.selected=null;this.replaying=false;
     this.recorder.start(a.hud.mt?.ms||Date.now(),sample,a.site.meta,planned);
-    this.message.textContent='Recording simulated astronaut activity.';
+    this.message.textContent='Recording started.';
   }
   build() {
     this.el=node('aside',null,'eva-journal');this.el.setAttribute('aria-label','EVA Mission Journal');
@@ -68,7 +70,7 @@ export class Journal {
     this.el.addEventListener('keydown',event=>{event.stopPropagation();if(event.key==='Escape'){this.content.hidden=true;this.el.querySelector('.journal-toggle').setAttribute('aria-expanded','false');this.el.querySelector('.journal-toggle').focus();}});
     this.el.addEventListener('pointerdown',e=>e.stopPropagation());
     this.el.addEventListener('click',e=>{const tab=e.target.closest('[data-tab]');if(tab){for(const pane of this.el.querySelectorAll('[data-pane]'))pane.hidden=pane.dataset.pane!==tab.dataset.tab;for(const b of this.el.querySelectorAll('[data-tab]'))b.classList.toggle('on',b===tab);this.position();}const action=e.target.closest('[data-action]');if(action)void this.action(action.dataset.action);});
-    this.form.onsubmit=event=>{event.preventDefault();try{this.recorder.note(this.form.elements.category.value,this.form.elements.note.value,this.editId);this.editId=null;this.form.elements.note.value='';this.el.querySelector('[data-action="cancel-edit"]').hidden=true;this.renderNotes();}catch(error){this.message.textContent=error.message;}};
+    this.form.onsubmit=event=>{event.preventDefault();void this.saveNote();};
     this.el.querySelector('.journal-sol').oninput=()=>this.renderHistory();
     this.el.querySelector('.journal-missions').onchange=e=>{this.selected=e.target.value||null;this.replaying=false;this.renderSelection();};
     this.el.querySelector('.journal-replay').oninput=e=>{this.replaying=false;this.showSample(+e.target.value);};
@@ -80,9 +82,9 @@ export class Journal {
       if(action==='pause')r.pause();
       if(action==='resume'){if(!this.sourceAvailable())throw Error('Enter helmet view or start EV1 playback to resume.');r.resume();}
       if(action==='end')r.end();
-      if(action==='cancel-edit'){this.editId=null;this.form.elements.note.value='';this.el.querySelector('[data-action="cancel-edit"]').hidden=true;}
+      if(action==='cancel-edit'){this.editId=null;this.editingMission=null;this.form.elements.note.value='';this.el.querySelector('[data-action="cancel-edit"]').hidden=true;}
       if(action==='retry'){this.storageError=null;await this.load();if(this.pendingRecovery){await this.store.save(this.pendingRecovery);this.history.set(this.pendingRecovery.id,this.pendingRecovery);this.pendingRecovery=null;this.renderSelection();}this.dirty=!!r.mission;await this.save();}
-      if(action==='recover'&&m&&!m.finalized){const copy=structuredClone(m);copy.finalized=true;copy.end=stamp(copy.clockMs,copy.elapsed);copy.summary=summary(copy);this.pendingRecovery=copy;await this.store.save(copy);this.history.set(copy.id,copy);this.pendingRecovery=null;this.storageError=null;this.renderSelection();}
+      if(action==='recover'&&m&&!m.finalized){if(this.pendingRecovery)throw Error('Retry the pending save first.');const copy=structuredClone(m);copy.finalized=true;copy.end=stamp(copy.clockMs,copy.elapsed);copy.summary=summary(copy);this.pendingRecovery=copy;this.refreshStorage();await this.store.save(copy);this.history.set(copy.id,copy);this.pendingRecovery=null;this.storageError=null;this.renderSelection();}
       if(action==='live'){this.selected=null;this.replaying=false;this.el.querySelector('.journal-missions').value='';this.route.show(r.mission);}
       if(action==='replay'&&m){if(r.mission?.status==='Recording')throw Error('Pause recording before reviewing a saved route.');this.replaying=!this.replaying;this.replayIndex=0;this.replayAt=performance.now();this.showSample(0);}
       if(action==='export'&&m){this.message.textContent='Rendering registered terrain report…';const pages=await renderReport(m);const host=this.el.querySelector('.journal-downloads');host.replaceChildren();for(const url of this.urls)URL.revokeObjectURL(url);this.urls=[];for(const page of pages){const url=URL.createObjectURL(page.blob);this.urls.push(url);const link=node('a',`Download ${page.name}`);link.href=url;link.download=page.name;host.append(link);}this.message.textContent=`${pages.length} PNG report page(s) ready below.`;}
@@ -90,7 +92,7 @@ export class Journal {
     } catch(error){this.message.textContent=error.message;if(action==='recover'||action==='retry'){this.storageError=error.message;this.refreshStorage();}}
   }
   refreshStorage() {
-    this.el.querySelector('.journal-storage').textContent=this.storageError?`NOT SAVED: ${this.storageError}`:this.saving?'Saving…':this.dirty?'Changes pending save':this.saved?'Saved locally (transaction complete)':'Browser-local mission history';
+    this.el.querySelector('.journal-storage').textContent=this.storageError?`NOT SAVED: ${this.storageError}`:this.saving?'Saving…':this.dirty||this.pendingRecovery?'Changes pending save':this.saved?'Saved locally (transaction complete)':'Browser-local mission history';
     this.el.querySelector('[data-action="retry"]').hidden=!this.storageError;
   }
   refresh() {
@@ -98,7 +100,7 @@ export class Journal {
     this.el.querySelector('.journal-rec').textContent=m?.status==='Recording'?'● REC':'';
     this.el.querySelector('.journal-summary').textContent=m?`${m.status} · ${m.id.slice(0,8)}\nSol ${stamp(m.clockMs).sol} · ${stamp(m.clockMs).lmst} LMST\n${fmt(m.elapsed,' s')} · ${fmt(s.distance,' m')} · ${m.entries.length} notes`:'Idle · enter helmet view or run EV1 to record.';
     for(const [action,disabled]of [['start',!this.loaded||active(m)||!this.sourceAvailable()],['pause',m?.status!=='Recording'],['resume',m?.status!=='Paused'],['end',!active(m)]])this.el.querySelector(`[data-action="${action}"]`).disabled=disabled;
-    this.form.querySelector('[type="submit"]').disabled=!active(m);
+    this.form.querySelector('[type="submit"]').disabled=!active(m)&&!this.editingMission;
     if(m)this.history.set(m.id,structuredClone(m));
     this.renderHistory();this.refreshStorage();
     if(!this.selected){this.route.show(m);this.renderNotes();}
@@ -117,21 +119,37 @@ export class Journal {
     this.el.querySelector('[data-action="recover"]').hidden=!(m?.status==='Interrupted'&&!m.finalized);
     for(const action of ['replay','export'])this.el.querySelector(`[data-action="${action}"]`).disabled=!m;
     const slider=this.el.querySelector('.journal-replay');slider.max=Math.max(0,points(m).length-1);slider.value=slider.max;slider.disabled=!points(m).length;
-    this.route.show(m);this.renderEntries(this.el.querySelector('.journal-history-notes'),m,false);
+    this.route.show(m);this.renderEntries(this.el.querySelector('.journal-history-notes'),m,true);
   }
   renderNotes(){this.renderEntries(this.el.querySelector('.journal-notes'),this.recorder.mission,true);}
   renderEntries(host,m,editable){
     const sig=JSON.stringify(m?.entries||[])+editable+(m?.status||'');if(host.dataset.signature===sig)return;host.dataset.signature=sig;host.replaceChildren();
     for(const entry of m?.entries||[]){const card=node('article',null,'journal-entry');card.append(node('strong',`${entry.category} · Sol ${entry.sol} ${entry.lmst}`),node('p',entry.text),node('small',coordinates(entry.position)));
-      if(editable&&active(m)){const edit=node('button','EDIT','btn');edit.onclick=()=>{this.editId=entry.id;this.form.elements.category.value=entry.category;this.form.elements.note.value=entry.text;this.el.querySelector('[data-action="cancel-edit"]').hidden=false;this.form.elements.note.focus();};const del=node('button','DELETE','btn');del.onclick=()=>{if(confirm('Delete this field note?')){this.recorder.deleteNote(entry.id);this.renderNotes();}};card.append(edit,del);}host.append(card);
+      if(editable){const edit=node('button','EDIT','btn');edit.onclick=()=>{this.editId=entry.id;this.editingMission=active(this.recorder.mission)&&this.recorder.mission.id===m.id?null:m.id;this.form.elements.category.value=entry.category;this.form.elements.note.value=entry.text;this.el.querySelector('[data-tab="notes"]').click();this.el.querySelector('[data-action="cancel-edit"]').hidden=false;this.form.querySelector('[type="submit"]').disabled=false;this.form.elements.note.focus();};const del=node('button','DELETE','btn');del.onclick=()=>{if(confirm('Delete this field note?')){if(active(this.recorder.mission)&&this.recorder.mission.id===m.id){this.recorder.deleteNote(entry.id);this.renderNotes();}else{const copy=structuredClone(m);copy.entries=copy.entries.filter(e=>e.id!==entry.id);void this.saveHistorical(copy);}}};card.append(edit,del);}host.append(card);
     }
   }
   showSample(index){const m=this.history.get(this.selected);if(!m)return;this.route.show(m,index);const p=points(m)[index];this.el.querySelector('.journal-replay').value=index;this.el.querySelector('.journal-replay-time').textContent=p?`REPLAY · Sol ${p.sol} ${p.lmst} · +${fmt(p.elapsed,' s')} · ${p.mode}`:'No position recorded.';}
+  async saveHistorical(copy) {
+    if(this.pendingRecovery){this.message.textContent='Retry the pending save before making another historical edit.';return false;}
+    copy.summary=summary(copy);
+    this.pendingRecovery=copy;
+    this.refreshStorage();
+    try{await this.store.save(copy);this.history.set(copy.id,copy);if(this.recorder.mission?.id===copy.id&&!active(this.recorder.mission))this.recorder.mission=structuredClone(copy);this.pendingRecovery=null;this.storageError=null;this.saved=true;this.renderSelection();this.refresh();return true;}
+    catch(error){this.storageError=error.message;this.message.textContent='Edit retained in memory; retry saving before leaving.';this.refreshStorage();return false;}
+  }
+  async saveNote() {
+    try{
+      const category=this.form.elements.category.value,text=this.form.elements.note.value;
+      if(this.editingMission){if(!text.trim()||!CATEGORIES.includes(category))throw Error('Enter a note and valid category.');const copy=structuredClone(this.history.get(this.editingMission));const entry=copy.entries.find(e=>e.id===this.editId);if(!entry)throw Error('Entry not found.');entry.category=category;entry.text=text.trim();entry.edited=stamp(copy.clockMs,copy.elapsed);if(!await this.saveHistorical(copy))return;}
+      else this.recorder.note(category,text,this.editId);
+      this.editId=null;this.editingMission=null;this.form.elements.note.value='';this.el.querySelector('[data-action="cancel-edit"]').hidden=true;this.renderNotes();this.refresh();
+    }catch(error){this.message.textContent=error.message;}
+  }
   frame(now){this.route.update();if(this.replaying&&now-this.replayAt>=200){this.replayAt=now;const n=points(this.history.get(this.selected)).length;this.replayIndex++;if(this.replayIndex>=n)this.replaying=false;else this.showSample(this.replayIndex);}if(!this.positionAt||now-this.positionAt>250){this.positionAt=now;this.position();}}
   position(){
     const suit=document.getElementById('h-suit'),helmet=this.app.fpv?.active;
     this.el.classList.toggle('journal-helmet',!!helmet);
-    if(helmet&&suit){const rect=suit.getBoundingClientRect();const bottom=innerHeight-rect.top+8;this.el.style.left=`${rect.left}px`;this.el.style.width=`${rect.width}px`;this.el.style.bottom=`${bottom}px`;this.content.style.maxHeight=`${Math.max(70,rect.top-100)}px`;}
+    if(helmet&&suit){const rect=suit.getBoundingClientRect();const bottom=innerHeight-rect.top+8;this.el.style.left=`${rect.left}px`;this.el.style.width=`${rect.width}px`;this.el.style.bottom=`${bottom}px`;const toggle=this.el.querySelector('.journal-toggle').getBoundingClientRect().height;const clearance=this.app.h<540?16:this.app.touch?56:84;this.content.style.maxHeight=`${Math.max(16,rect.top-toggle-clearance)}px`;}
     else {this.el.style.left='';this.el.style.width='';this.el.style.bottom='';this.content.style.maxHeight='';}
   }
 }

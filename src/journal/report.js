@@ -9,9 +9,12 @@ export function wrapText(ctx, text, width) {
   const lines = [];
   for (const paragraph of String(text).split('\n')) {
     let line = '';
-    for (const char of Array.from(paragraph)) {
-      if (line && ctx.measureText(line + char).width > width) { lines.push(line); line = ''; }
-      line += char;
+    for (const word of paragraph.match(/\S+\s*|\s+/g) || []) {
+      if (line && ctx.measureText(line + word).width > width) { lines.push(line); line = ''; }
+      for (const char of Array.from(word)) {
+        if (line && ctx.measureText(line + char).width > width) { lines.push(line); line = ''; }
+        line += char;
+      }
     }
     lines.push(line);
   }
@@ -36,7 +39,8 @@ function drawMap(c, mission, im, x, y, w, h) {
   const minX=xs.length?Math.min(...xs):0, maxX=xs.length?Math.max(...xs):im.width;
   const minY=ys.length?Math.min(...ys):0, maxY=ys.length?Math.max(...ys):im.height;
   const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
-  let scale=Math.min(w / Math.max(160,(maxX-minX)*1.25), h / Math.max(160,(maxY-minY)*1.25));
+  const minimumPixels = im.width * 50 / terrain.sizeM[0]; // at least 50 m of real coverage
+  let scale=Math.min(w / Math.max(minimumPixels,(maxX-minX)*1.25), h / Math.max(minimumPixels,(maxY-minY)*1.25));
   // Letterbox the image if the requested padded bounds extend outside its coverage.
   const cw=w/scale,ch=h/scale;
   const sx=cw<=im.width?Math.max(0,Math.min(im.width-cw,cx-cw/2)):(im.width-cw)/2;
@@ -49,7 +53,7 @@ function drawMap(c, mission, im, x, y, w, h) {
   for(const s of mission.segments) { line(s.points,'#361516',7); line(s.points,colors.red,4); }
   function marker(p,label) { if(!p)return;const q=project(p);c.fillStyle=colors.text;c.beginPath();c.arc(q.x,q.y,6,0,Math.PI*2);c.fill();const tx=Math.min(x+w-140,Math.max(x+8,q.x+12));const ty=Math.min(y+h-34,Math.max(y+8,q.y-28));c.fillStyle='#101317';c.fillRect(tx-5,ty-3,132,26);text(c,label,tx,ty+16,16,colors.text,700); }
   const first=route[0],last=route.at(-1);
-  if(first && last && Math.hypot(first.x-last.x,first.z-last.z)<.002) marker(first,'START / END');
+  if(first && last && Math.hypot(first.x-last.x,first.z-last.z)<.00001) marker(first,'START / END');
   else {marker(first,'START');marker(last,'END');}
   c.fillStyle='#101317dd';c.fillRect(x+12,y+12,390,32);text(c,'ACTUAL  ━ RED     PLANNED  ┄ CYAN',x+24,y+34,15);
   c.fillStyle='#101317dd';c.fillRect(x+w-62,y+12,48,66);text(c,'N',x+w-47,y+36,19,colors.text,700);text(c,'↑',x+w-47,y+65,28);

@@ -20,11 +20,11 @@ export function summary(m) {
 export class MissionRecorder {
   constructor({ id = () => crypto.randomUUID(), changed = () => {} } = {}) { this.id = id; this.changed = changed; this.mission = null; this.last = null; }
   start(ms, sample, terrain, planned) {
-    if (active(this.mission) || this.mission?.status === 'Interrupted') throw Error('Finalize the existing mission first.');
+    if (active(this.mission) || (this.mission?.status === 'Interrupted' && !this.mission.finalized)) throw Error('Finalize the existing mission first.');
     this.mission = { schemaVersion: 1, id: this.id(), status: 'Recording', start: stamp(ms), end: null,
       clockMs: ms, elapsed: 0, distance: 0, movementDuration: 0, energyJ: 0, powerSeconds: 0,
       segments: [], entries: [], telemetry: [], terrain: structuredClone(terrain), planned: structuredClone(planned || []) };
-    this.last = null; this.breakNext = true;
+    this.last = null; this.latest = null; this.breakNext = true;
     if (sample) this.ingest(sample, 0);
     this.changed(); return this.mission;
   }
@@ -33,6 +33,7 @@ export class MissionRecorder {
     if (!active(m)) return;
     dt = valid(dt) && dt >= 0 ? dt : 0;
     m.clockMs += dt * 1000;
+    if (sample && valid(sample.x) && valid(sample.z)) this.latest = sample;
     if (m.status === 'Paused') { this.last = null; this.breakNext = true; return; }
     m.elapsed += dt;
     if (!sample || !valid(sample.x) || !valid(sample.z)) { this.last = null; this.breakNext = true; return; }
@@ -79,7 +80,7 @@ export class MissionRecorder {
     const existing = id && m.entries.find(e => e.id === id);
     if (id && !existing) throw Error('Entry not found.');
     if (existing) { existing.category = category; existing.text = text.trim(); existing.edited = stamp(m.clockMs, m.elapsed); }
-    else m.entries.push({ id: this.id(), missionId: m.id, category, text: text.trim(), ...stamp(m.clockMs, m.elapsed), position: this.last ? { x: this.last.x, z: this.last.z, lat: this.last.lat, lon: this.last.lon } : null });
+    else m.entries.push({ id: this.id(), missionId: m.id, category, text: text.trim(), ...stamp(m.clockMs, m.elapsed), position: this.latest ? { x: this.latest.x, z: this.latest.z, lat: this.latest.lat, lon: this.latest.lon } : null });
     this.changed();
   }
   deleteNote(id) { if (!active(this.mission)) throw Error('Only active mission notes can be changed.'); this.mission.entries = this.mission.entries.filter(e => e.id !== id); this.changed(); }
