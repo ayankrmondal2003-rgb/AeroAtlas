@@ -30,14 +30,14 @@ export function renderProfile(host, result, { slopeAt, limits, onHover, pnr, pnr
 
   // grid + y ticks
   for (let v = y0; v <= y1 + 1e-6; v += step) {
-    el('line', { x1: pad.l, x2: W - pad.r, y1: Y(v), y2: Y(v), stroke: '#3a3531', 'stroke-width': 1 }, svg);
-    const t = el('text', { x: pad.l - 6, y: Y(v) + 3.5, 'text-anchor': 'end', fill: '#8c7f74', 'font-size': 10, 'font-family': 'JetBrains Mono' }, svg);
+    el('line', { x1: pad.l, x2: W - pad.r, y1: Y(v), y2: Y(v), stroke: 'var(--grid)', 'stroke-width': 1 }, svg);
+    const t = el('text', { x: pad.l - 6, y: Y(v) + 3.5, 'text-anchor': 'end', fill: 'var(--text-3)', 'font-size': 10, 'font-family': 'JetBrains Mono' }, svg);
     t.textContent = Math.round(v).toLocaleString('en-US');
   }
   // x ticks (km)
   const kmStep = niceStep(total / 1000 / 4);
   for (let k = 0; k <= total / 1000 + 1e-6; k += kmStep) {
-    const t = el('text', { x: X(k * 1000), y: H - 4, 'text-anchor': 'middle', fill: '#8c7f74', 'font-size': 10, 'font-family': 'JetBrains Mono' }, svg);
+    const t = el('text', { x: X(k * 1000), y: H - 4, 'text-anchor': 'middle', fill: 'var(--text-3)', 'font-size': 10, 'font-family': 'JetBrains Mono' }, svg);
     t.textContent = `${+k.toFixed(2)} km`;
   }
 
@@ -55,20 +55,20 @@ export function renderProfile(host, result, { slopeAt, limits, onHover, pnr, pnr
   // area + line
   let dLine = '';
   s.forEach((p, i) => { dLine += `${i ? 'L' : 'M'}${X(p.d).toFixed(1)},${Y(p.e).toFixed(1)}`; });
-  el('path', { d: `${dLine}L${X(total)},${plotB}L${X(0)},${plotB}Z`, fill: '#5fd4ff', 'fill-opacity': 0.1 }, svg);
-  el('path', { d: dLine, fill: 'none', stroke: '#5fd4ff', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+  el('path', { d: `${dLine}L${X(total)},${plotB}L${X(0)},${plotB}Z`, fill: 'var(--data)', 'fill-opacity': 0.1 }, svg);
+  el('path', { d: dLine, fill: 'none', stroke: 'var(--data)', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
 
   // stops
   result.stopAtD.forEach((d, i) => {
     const p = s[Math.round((d / total) * (s.length - 1))];
-    el('circle', { cx: X(d), cy: Y(p.e), r: 4, fill: '#5fd4ff', stroke: '#1a1a19', 'stroke-width': 2 }, svg);
-    const t = el('text', { x: X(d), y: Y(p.e) - 8, 'text-anchor': 'middle', fill: '#c7b8aa', 'font-size': 10, 'font-family': 'JetBrains Mono' }, svg);
+    el('circle', { cx: X(d), cy: Y(p.e), r: 4, fill: 'var(--data)', stroke: 'var(--chart-surface)', 'stroke-width': 2 }, svg);
+    const t = el('text', { x: X(d), y: Y(p.e) - 8, 'text-anchor': 'middle', fill: 'var(--text-2)', 'font-size': 10, 'font-family': 'JetBrains Mono' }, svg);
     t.textContent = String(i + 2);
   });
 
   if (pnr) {
     el('line', { x1: X(pnr.d), x2: X(pnr.d), y1: pad.t, y2: plotB, stroke: '#d03b3b', 'stroke-width': 2 }, svg);
-    const t = el('text', { x: X(pnr.d) + 4, y: pad.t + 9, fill: '#c7b8aa', 'font-size': 10, 'font-family': 'JetBrains Mono' }, svg);
+    const t = el('text', { x: X(pnr.d) + 4, y: pad.t + 9, fill: 'var(--text-2)', 'font-size': 10, 'font-family': 'JetBrains Mono' }, svg);
     t.textContent = pnrLabel;
   }
 
@@ -83,11 +83,11 @@ export function renderProfile(host, result, { slopeAt, limits, onHover, pnr, pnr
   // live EV1 position during the simulation
   const ev = el('g', { visibility: 'hidden' }, svg);
   const evLine = el('line', { y1: pad.t, y2: plotB, stroke: '#ffffff', 'stroke-width': 1.5 }, ev);
-  const evDot = el('circle', { r: 4.5, fill: '#ffffff', stroke: '#1a1a19', 'stroke-width': 2 }, ev);
+  const evDot = el('circle', { r: 4.5, fill: '#ffffff', stroke: 'var(--chart-surface)', 'stroke-width': 2 }, ev);
 
   // crosshair + tooltip
-  const cross = el('line', { y1: pad.t, y2: plotB, stroke: '#c7b8aa', 'stroke-width': 1, visibility: 'hidden' }, svg);
-  const dot = el('circle', { r: 4, fill: '#5fd4ff', stroke: '#1a1a19', 'stroke-width': 2, visibility: 'hidden' }, svg);
+  const cross = el('line', { y1: pad.t, y2: plotB, stroke: 'var(--text-2)', 'stroke-width': 1, visibility: 'hidden' }, svg);
+  const dot = el('circle', { r: 4, fill: 'var(--data)', stroke: 'var(--chart-surface)', 'stroke-width': 2, visibility: 'hidden' }, svg);
   const tip = document.createElement('div');
   tip.className = 'tip';
   host.appendChild(tip);

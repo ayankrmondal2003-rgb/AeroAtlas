@@ -1,4 +1,5 @@
 import './styles.css';
+import { startLoadingVideo } from './ui/intro.js';
 import * as THREE from 'three';
 import { loadAssets } from './core/assets.js';
 import { fetchSpaceWeather } from './lib/spaceweather.js';
@@ -157,7 +158,7 @@ class App {
     this.setActive(this.orbit, 'orbit');
     this.hud.renderOrbit(this.orbit);
     this.bindInput();
-    document.getElementById('loader').classList.add('done');
+    loadingVideo.finish();
     this.hud.caption('AERO ATLAS', this.touch ? 'Pinch to zoom toward Jezero. Drag to spin Mars.' : 'Scroll to zoom toward Jezero. Drag to spin Mars.', 5000);
     this.renderer.setAnimationLoop((t) => this.frame(t));
     // live CME forecasts for Mars (NASA DONKI); optional, the app works the same without it
@@ -532,9 +533,16 @@ class App {
   }
 }
 
-const app = new App();
-window.solAtlas = app;
-app.start().catch((err) => {
-  console.error(err);
-  document.getElementById('loader-log').innerHTML = `<div style="color:#ff7b7b">Failed to start: ${err.message}</div>`;
-});
+const loadingVideo = startLoadingVideo();
+async function boot() {
+  try {
+    const app = new App();
+    window.solAtlas = app;
+    await app.start();
+  } catch (err) {
+    console.error(err);
+    loadingVideo.fail();
+    document.getElementById('loader-log').textContent = `Failed to start: ${err.message}`;
+  }
+}
+void boot();
