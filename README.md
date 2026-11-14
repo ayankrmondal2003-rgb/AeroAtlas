@@ -405,9 +405,12 @@ Downloads are cached in `.cache/`, which is git-ignored. The `lite` stage writes
 
 ---
 
-## Deploy to Render
+## Deploy to Render (100% Free Tier)
 
-The site is configured for **[Render](https://render.com/)** using [`render.yaml`](render.yaml) as a high-performance **Static Site** (free hosting with global CDN, custom domains, and automatic SSL).
+AeroAtlas is configured as a **Render Static Site**, which is **completely free forever** on Render's Free tier:
+- **No spin-down / sleep delays:** Unlike free Web Services which shut down after 15 minutes of inactivity and take 50s+ to wake up, Render Static Sites run directly from Render's global CDN and are **instant 24/7**.
+- **No credit card required:** Render Static Sites do not require a payment method.
+- **Resource conservation:** Fast builds (~10s) conserve your monthly 500 build minutes, and aggressive caching preserves the 100 GB/month bandwidth limit.
 
 ### Option 1: Deploy with Render Blueprint (Recommended)
 
@@ -415,22 +418,18 @@ The site is configured for **[Render](https://render.com/)** using [`render.yaml
 2. Go to the [Render Dashboard](https://dashboard.render.com).
 3. Click **New +** -> **Blueprint**.
 4. Connect your GitHub repository (`AeroAtlas`).
-5. Render will automatically detect `render.yaml` and configure the Static Site:
-   - **Type:** Static Site
-   - **Build Command:** `npm install && npm run build`
-   - **Publish Directory:** `dist`
-   - **Node Version:** `22` (defined via `.node-version` and `render.yaml`)
-6. Click **Apply**. Render will build and deploy your site to an active `*.onrender.com` URL.
+5. Render will detect [`render.yaml`](render.yaml) and configure the Free Static Site automatically.
+6. Click **Apply**. Render will build and launch your site at a free `*.onrender.com` address.
 
-### Option 2: Manual Static Site Setup on Render
+### Option 2: Manual Free Static Site Setup
 
 1. Go to [Render Dashboard](https://dashboard.render.com) -> **New +** -> **Static Site**.
 2. Connect your GitHub repository.
-3. Configure the settings:
+3. Fill in the build settings:
    - **Name:** `aeroatlas` (or your chosen name)
    - **Branch:** `main`
    - **Root Directory:** (leave blank if repo root, or `AeroAtlas` if in a subfolder)
-   - **Build Command:** `npm install && npm run build`
+   - **Build Command:** `npm install --no-audit --prefer-offline && npm run build`
    - **Publish Directory:** `dist`
 4. Under **Redirects/Rewrites**:
    - Add a rewrite rule: Source `/*` -> Destination `/index.html` (Action: `Rewrite`).
