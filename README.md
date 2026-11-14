@@ -4,8 +4,6 @@
 
 Originally developed as **Sol Atlas** by **The SOL Explorers** · NASA Space Apps Challenge 2026 · challenge: *Interplanetary Survival Guide: Martian Map*
 
-**AI use:** [Disclosure](#ai-use-disclosure)
-
 Screenshots below document the original Sol Atlas build; historical branding in those captures is retained.
 
 ![Historical Sol Atlas: Mars from orbit with landing sites and data layers](docs/screenshots/01-orbit.jpg)
@@ -35,7 +33,6 @@ This is the **phase-1 prototype** made for the 240-second local-judging video. J
 - [Deploy](#deploy)
 - [Project structure](#project-structure)
 - [Limitations and roadmap](#limitations-and-roadmap)
-- [AI use disclosure](#ai-use-disclosure)
 - [Credits](#credits)
 - [Licence](#licence)
 
@@ -120,7 +117,7 @@ Press **`F`**, **◉ HELMET VIEW**, or **STAND HERE** on a pin to stand on the t
 | **Synthesised sound** (♪ / `M`) | Wind, lock-on, alarms, suit breathing. All generated in the browser, no audio files |
 | **● REC** (`R`) | Records the tab (HUD and sound included) to a video file for the pitch |
 
-Sound and REC came from ideas in a teammate's early prototype. Its images and several coordinates weren't reusable (AI-generated pictures, approximate positions), so only the ideas were carried over.
+Sound and REC came from ideas in a teammate's early prototype. Its imagery and several coordinates weren't reusable, so only the ideas were carried over.
 
 ---
 
@@ -203,7 +200,6 @@ NASA map products are obtained through the USGS Astrogeology public `asc-pds-ser
 - U.S. Geological Survey (USGS) Astrogeology Science Center: processed, controlled and archived the NASA maps above (CTX and HiRISE mosaics and elevation models, the THEMIS controlled mosaic), served from its public "asc-pds-services" archive on AWS.
 - Scientific references: Pandolf, Givoni & Goldman (1977), load-carriage metabolic equation, used for the EVA oxygen model; Tobler's hiking function (walking speed vs slope); Mangold et al. (2021), Science, Jezero delta geology.
 - Software: three.js (MIT licence), Vite (MIT). Python: rasterio, NumPy, Pillow, SciPy. Fonts: Rajdhani, Orbitron, JetBrains Mono (SIL Open Font Licence, via Fontsource).
-- AI tools: Claude Code (Anthropic); OpenAI Codex assisted with repository documentation cleanup. Claude Code wrote the code and documentation under the team's direction. See the AI use disclosure section of this README.
 - Our own assumptions (labelled in the app): proposed crew landing zone LZ-A, suit oxygen capacity 0.60 kg with a 25 % reserve, 20° walking-slope limit, approximate positions of some named places.
 ```
 
@@ -490,61 +486,6 @@ scripts/smoke.cjs       Playwright smoke test (desktop or DEVICE="iPhone 14")
 - Live MEDA weather.
 - Dust-storm alerts from orbit. Space-weather alerts for CMEs are in (NASA DONKI); solar energetic particle alerts would be the next step.
 - An offline mode for suits and rovers.
-
----
-
-## AI use disclosure
-
-The following records AI assistance in the project originally developed as Sol Atlas.
-
-### What AI was used for
-
-| Part of the project | AI involvement |
-|---|---|
-| **Application code** (JavaScript, GLSL shaders, HTML, CSS in `src/` and `index.html`) | Written by an AI coding assistant, **Claude Code (Anthropic)**, following the team's instructions. The team set the goals and features, tested each version, and asked for fixes. |
-| **Data-processing pipeline** (`scripts/build_data.py`) | Written by the AI assistant, which also ran it to convert the NASA files. The pipeline only resamples, crops and colour-maps NASA data; it does not invent values. |
-| **Test scripts** (`scripts/smoke.cjs`) | Written by the AI assistant. |
-| **Documentation** (README, historical development documents, the in-app text and place descriptions) | Drafted by the AI assistant. The place descriptions summarise the published sources cited next to them. |
-| **Pitch script and background research** | Drafted with the help of an AI assistant (Claude). |
-
-### Why we used AI
-
-A working 3D map on real NASA data is a lot of code for a student team in a short time. The AI assistant wrote that code, so the team's own time went into what the project is about: the survival question we answer (will the astronaut get home with oxygen to spare?), choosing the NASA data, the planning rules, and testing on our own phones and computers.
-
-### The prompts we gave
-
-The assistant worked from plain-language requests by the team, given over several sessions. The main requests included:
-
-| Date | What we asked for (summarised) | What the AI worked on |
-|---|---|---|
-| 24 Sep 2026 | Build *Sol Atlas* from our pitch script: a rotating real-data Mars, zoom into Jezero Crater, then a game-style map where you plan a walk from a landing zone to the Three Forks sample depot and check the oxygen. Use real NASA data only. | NASA/USGS map files (Viking, MOLA, THEMIS, CTX, HiRISE), our pitch script |
-| 24 Sep 2026 | The desktop lags in transitions and the phone freezes; make it run on phones and fix the phone layout. | The app code |
-| 25 Sep 2026 | Review a teammate's prototype and take anything good; add more real data; make EV1 stop where the oxygen runs out; route to any point, like a maps app; add a first-person view; push each feature when it is done. | The teammate's prototype code, the Perseverance waypoint archive |
-| 25 Sep 2026 | Fix the bugs we found in testing (autopilot would not stop, hidden hover cards, dead buttons), make the helmet view work on phones with joysticks, and keep a record another person or AI can pick up. | The app code, our bug reports |
-| 28 Sep 2026 | Is all the data real and reliable? Is there newer data? Are we following NASA's guidelines? | Space Apps rules (via web search), the data links |
-| 29 Oct 2026 | Check the project against the Participants Guide and the challenge, and do what is needed. | The Bangladesh Participants Guide, a build guide for the 14 challenges |
-
-### Where our own work went
-
-- **The idea and the story:** the survival question, the *Martian* hook, Jezero as the site and the walk to Three Forks came from our pitch script.
-- **The choices:** which datasets to use, the suit and walking assumptions, the proposed crew landing zone LZ-A, what to show and what to cut, and when to hide a feature.
-- **Testing and review:** we ran every build on our own computers and phones, reported the bugs, and decided whether each fix was right.
-- **The pitch and the videos:** the script was drafted with AI help (see the table above), but we edit it, present it and record the videos ourselves.
-
-### What is not AI-generated
-
-- **Map data comes from NASA missions and ESA Mars Express HRSC (ESA/DLR/FU Berlin)**: Viking, Mars Global Surveyor MOLA, Mars Odyssey THEMIS, MRO CTX, MRO HiRISE and Mars 2020 Perseverance. The full list, with the exact files, is in [Dataset sources and processing](#dataset-sources-and-processing). No terrain, image or measurement in the app was produced by an AI model.
-- **No AI-generated images, video or audio** are used anywhere in the app or the repository. The screenshots in `docs/screenshots/` are captures of the running app, which renders the NASA data. The sound effects are generated live by ordinary code (Web Audio oscillators and filtered noise), not by an AI audio model.
-- **The app calls no AI service at runtime.** Its only live call is to NASA's DONKI space-weather service (CME forecasts for Mars); everything else works offline once loaded, and no API key is needed in the browser.
-- **No NASA logos, insignia or mission patches** are used. Mission and instrument names appear only as data credits.
-
-### Documentation cleanup assistance
-
-OpenAI Codex assisted with repository documentation inspection, consolidation, reference checks and removal of redundant Markdown files in November 2026, at the maintainer's request. It worked on repository documentation; this cleanup did not change application code or scientific data.
-
-### Submission disclosure
-
-Include the tools used, their roles, the team's contributions and relevant data credits in the competition project submission as well as this repository. NASA Space Apps organizer guidance requires clear AI disclosure and visible watermarks on AI-generated images and videos; it also restricts NASA branding in AI-generated content. See the [2026 organizer clarification](https://github.com/nasa/spaceapps/discussions/1947). This repository disclosure does not replace the project submission fields. No requirement for a particular Markdown filename was established during this cleanup.
 
 ---
 

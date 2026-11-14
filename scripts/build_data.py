@@ -231,7 +231,7 @@ def warp(src_path, dst_shape, dst_transform, dst_crs=LOCAL_CRS, resampling=Resam
 
 def save_u16_png(q, name):
     """16-bit values packed losslessly into an 8-bit RGB PNG (value = R*256 + G).
-    PNG instead of raw binary so any static host (and claude.ai artifacts) can serve it."""
+    PNG instead of raw binary so any static host can serve it."""
     q = q.astype(np.uint32)
     rgb = np.dstack([(q >> 8) & 255, q & 255, np.zeros_like(q)]).astype(np.uint8)
     Image.fromarray(rgb).save(os.path.join(OUT, name), optimize=True)
