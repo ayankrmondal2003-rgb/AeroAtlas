@@ -158,7 +158,7 @@ class App {
     this.hud.renderOrbit(this.orbit);
     this.bindInput();
     document.getElementById('loader').classList.add('done');
-    this.hud.caption('SOL ATLAS', this.touch ? 'Pinch to zoom toward Jezero. Drag to spin Mars.' : 'Scroll to zoom toward Jezero. Drag to spin Mars.', 5000);
+    this.hud.caption('AERO ATLAS', this.touch ? 'Pinch to zoom toward Jezero. Drag to spin Mars.' : 'Scroll to zoom toward Jezero. Drag to spin Mars.', 5000);
     this.renderer.setAnimationLoop((t) => this.frame(t));
     // live CME forecasts for Mars (NASA DONKI); optional, the app works the same without it
     this.spaceWeather = null;

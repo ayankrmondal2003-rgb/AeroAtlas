@@ -1,4 +1,4 @@
-// Places shown in Sol Atlas. Coordinates are planetocentric latitude / east longitude (deg).
+// Places shown in Aero Atlas. Coordinates are planetocentric latitude / east longitude (deg).
 // `approx: true` marks positions we placed by eye on the CTX/HiRISE mosaics.
 
 export const JEZERO_CENTER = { lat: 18.40, lon: 77.60 };
@@ -74,7 +74,7 @@ export const SITE_POIS = [
     id: 'lz', name: 'LZ-A · Crew Landing Zone', kind: 'lz', lat: 18.4500, lon: 77.4850, proposed: true,
     reason: 'Airlock: EVA starts and ends here',
     text: 'Our proposed crew landing zone. It sits on flat Máaz lava floor, with a median slope under 3° in the HiRISE DTM, and keeps over 4 km of stand-off so engine plume ejecta cannot reach the sample depot.',
-    source: 'Sol Atlas design (HiRISE DTM analysis)',
+    source: 'Aero Atlas design (HiRISE DTM analysis)',
   },
   CRATER_POIS[0],
   CRATER_POIS[1],

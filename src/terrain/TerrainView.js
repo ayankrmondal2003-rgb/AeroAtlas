@@ -239,7 +239,7 @@ export class TerrainView {
       const { x, z } = this.lonlatToXZ(p.lat, p.lon);
       if (Math.abs(x) > this.sizeX / 2 || Math.abs(z) > this.sizeZ / 2) continue;
       const siteTag = { lz: 'Airlock · proposed', landing: 'Historic site', science: 'Sample depot', geology: 'Science stop' }[p.kind];
-      const tag = this.id === 'site' ? siteTag : p.proposed ? 'Proposed · Sol Atlas' : p.approx ? 'Approx. position' : fmtLat(p.lat) + ' ' + fmtLon(p.lon);
+      const tag = this.id === 'site' ? siteTag : p.proposed ? 'Proposed · Aero Atlas' : p.approx ? 'Approx. position' : fmtLat(p.lat) + ' ' + fmtLon(p.lon);
       const html = `<div class="dot"></div><div class="lb">${p.name}<small>${tag}</small></div>
         <div class="card"><b>${p.name}</b>${p.reason && this.id === 'site' ? `<span style="color:var(--data)">${p.reason}.</span> ` : ''}${p.text}${p.photo && this.id === 'site' ? `<img src="${dataUrl(p.photo.file)}" data-photo-poi="${p.id}" title="Click to enlarge" alt="Perseverance ${p.photo.camera} view at ${p.name}" loading="lazy"><em>What you\u2019ll see: Perseverance ${p.photo.camera}, sol ${p.photo.sol}. Raw image, ${p.photo.credit}</em>` : ''}<em>Source: ${p.source}</em>${this.id === 'site' && p.id !== 'lz' ? '<em style="color:var(--data)">Click to add it to the Marswalk</em>' : ''}</div>`;
       const item = labels.add(this.id, {

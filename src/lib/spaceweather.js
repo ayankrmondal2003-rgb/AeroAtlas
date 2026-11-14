@@ -63,7 +63,7 @@ export async function fetchSpaceWeather() {
   const q = `startDate=${day(start)}&endDate=${day(end)}`;
   const local = /^(localhost|127\.|\[::1\])/.test(location.hostname); // dev servers have no function
   const tries = [
-    ...(local ? [] : [['NASA DONKI via Sol Atlas', `api/space-weather?${q}`]]),
+    ...(local ? [] : [['NASA DONKI via Aero Atlas', `api/space-weather?${q}`]]),
     ['NASA DONKI · api.nasa.gov', `https://api.nasa.gov/DONKI/WSAEnlilSimulations?${q}&api_key=DEMO_KEY`],
   ];
   let error = 'offline';

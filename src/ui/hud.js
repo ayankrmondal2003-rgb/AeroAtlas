@@ -10,6 +10,7 @@ import { url as dataUrl } from '../core/assets.js';
 import { Recorder } from './recorder.js';
 import { FEATURES } from '../config.js';
 import { describeSpaceWeather } from '../lib/spaceweather.js';
+import { openMineralScience } from './mineralScience.js';
 
 const $ = (id) => document.getElementById(id);
 const ICON = {
@@ -316,7 +317,7 @@ export class Hud {
     this.setCrumbs(view.id);
     this.sheetLabel(site ? 'PLANNER' : 'CRATER');
     this.infoTab(site || FEATURES.craterPanel);
-    const rows = TERRAIN_LAYERS.map((l) => `
+    const rows = TERRAIN_LAYERS.filter((l) => l.id !== 'minerals').map((l) => `
       <div class="layer ${l.locked ? 'locked' : ''} ${view.layers[l.id] ? 'on' : ''}" data-layer="${l.id}" title="${l.locked ? 'Planned for phase 2' : ''}">
         <span class="box">${l.locked ? '' : ''}</span>
         <span><div class="nm">${l.name}</div><div class="src">${site ? l.srcSite : l.srcCrater}</div></span>
@@ -326,6 +327,7 @@ export class Hud {
       <div class="sec">
         <div class="sec-h">Data layers <span class="tag">${site ? 'HiRISE ZONE' : 'CTX CRATER'}</span></div>
         ${rows}
+        <button class="row" id="btn-mineral-science" aria-haspopup="dialog" aria-controls="modal"><span class="ic">${ICON.book}</span><span><div class="nm">Mineral Science</div><div class="ds">Jezero research · no map overlay</div></span></button>
         <div id="t-legend"></div>
       </div>
       <div class="sec">
@@ -355,6 +357,7 @@ export class Hud {
         this.app.toggleTerrainLayer(d.dataset.layer);
       };
     });
+    $('btn-mineral-science').onclick = (e) => openMineralScience(view.id, e.currentTarget);
     const rt = $('r-time'), re = $('r-exag');
     rt.oninput = () => { view.setTime(+rt.value); this.sunInfo(view); };
     rt.onchange = () => { if (site) this.app.planner.refreshSun(); };
@@ -625,7 +628,7 @@ export class Hud {
   showSources() {
     $('modal-body').innerHTML = `
       <h2>DATA SOURCES & CREDITS</h2>
-      <p>Everything in Sol Atlas is real mission data, from NASA plus ESA's Mars Express. Nothing is hand-painted. Files were pulled from the public USGS Astrogeology archive (<code>asc-pds-services</code>) and processed by <code>scripts/build_data.py</code>.</p>
+      <p>Everything in Aero Atlas is real mission data, from NASA plus ESA's Mars Express. Nothing is hand-painted. Files were pulled from the public USGS Astrogeology archive (<code>asc-pds-services</code>) and processed by <code>scripts/build_data.py</code>.</p>
       <h3>ORBIT VIEW</h3>
       <table><tr><th>LAYER</th><th>MISSION / INSTRUMENT</th><th>PRODUCT</th></tr>
         <tr><td>Visible colour</td><td>Viking Orbiter 1 & 2</td><td>MDIM 2.1 global mosaic, recoloured by NASA Ames (232 m)</td></tr>

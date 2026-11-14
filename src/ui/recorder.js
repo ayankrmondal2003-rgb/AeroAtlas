@@ -37,7 +37,7 @@ export class Recorder {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-      a.download = `sol-atlas-${ts}.${type.includes('mp4') ? 'mp4' : 'webm'}`;
+      a.download = `aero-atlas-${ts}.${type.includes('mp4') ? 'mp4' : 'webm'}`;
       document.body.appendChild(a);
       a.click();
       a.remove();

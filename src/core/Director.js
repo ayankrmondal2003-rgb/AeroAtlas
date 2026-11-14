@@ -123,7 +123,7 @@ export class Director {
     o.altTarget = 3.0;
     a.setOrbitLayer('visible');
 
-    this.cap('SOL ATLAS', 'Every NASA Mars mission, layered into one map', 4200);
+    this.cap('AERO ATLAS', 'Every NASA Mars mission, layered into one map', 4200);
     await this.wait(4.5);
 
     a.setOrbitLayer('topo');
@@ -231,7 +231,7 @@ export class Director {
     pl.stopSim();
     a.hud.caption(null);
 
-    // the one-take: pick a destination, Sol Atlas plans the walk
+    // the one-take: pick a destination, Aero Atlas plans the walk
     await this.step(s.flyTo(s.overview(), 2.0));
     pl.waypoints = pl.waypoints.slice(0, 1);
     pl.compute();
@@ -244,7 +244,7 @@ export class Director {
     a.toggleTerrainLayer('holo', true);
     a.toggleTerrainLayer('contour', true);
     s.autoOrbit = 0.05;
-    this.cap('THE SOL EXPLORERS · NASA SPACE APPS 2026', 'Sol Atlas plans the walk. Every sol counts.', 0);
+    this.cap('AERO ATLAS · NASA SPACE APPS 2026', 'Aero Atlas plans the walk. Every sol counts.', 0);
     await this.wait(6);
     a.toggleTerrainLayer('holo', false);
     a.toggleTerrainLayer('contour', false);
