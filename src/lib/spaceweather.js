@@ -5,9 +5,8 @@
 // each run lists the planets and spacecraft the CME is predicted to hit, Mars included, with an arrival
 // time. We read the last 30 days of runs and keep the latest forecast for each CME that reaches Mars.
 //
-// Fetch order: our Netlify Function (/api/space-weather, holds a free NASA API key server-side and is
-// cached at the CDN), then api.nasa.gov directly with DEMO_KEY. Offline, the check says "not checked";
-// nothing else in the app depends on it.
+// Fetch order: live space weather from NASA DONKI (api.nasa.gov) with DEMO_KEY.
+// Offline, the check says "not checked"; nothing else in the app depends on it.
 
 const CACHE_KEY = 'sol-atlas-donki';
 const CACHE_MS = 30 * 60 * 1000;
@@ -61,9 +60,7 @@ export async function fetchSpaceWeather() {
   if (c) return { ok: true, source: c.source, summary: summariseEnlil(c.sims) };
   const end = Date.now(), start = end - 30 * 24 * H;
   const q = `startDate=${day(start)}&endDate=${day(end)}`;
-  const local = /^(localhost|127\.|\[::1\])/.test(location.hostname); // dev servers have no function
   const tries = [
-    ...(local ? [] : [['NASA DONKI via Aero Atlas', `api/space-weather?${q}`]]),
     ['NASA DONKI · api.nasa.gov', `https://api.nasa.gov/DONKI/WSAEnlilSimulations?${q}&api_key=DEMO_KEY`],
   ];
   let error = 'offline';

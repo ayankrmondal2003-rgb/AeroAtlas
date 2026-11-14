@@ -12,7 +12,7 @@ function dataVersion(dir = 'public/data') {
   return h.digest('hex').slice(0, 10);
 }
 
-// Relative base so the build works from any sub-path (GitHub Pages, Netlify, a USB stick).
+// Relative base so the build works from any sub-path (Render, GitHub Pages, a USB stick).
 export default defineConfig({
   base: './',
   define: { __DATA_V__: JSON.stringify(dataVersion()) },

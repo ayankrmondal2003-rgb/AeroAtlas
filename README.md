@@ -4,7 +4,7 @@
 
 Originally developed as **Sol Atlas** by **The SOL Explorers** · NASA Space Apps Challenge 2026 · challenge: *Interplanetary Survival Guide: Martian Map*
 
-**Live demo:** https://sol-atlas.netlify.app · **AI use:** [Disclosure](#ai-use-disclosure)
+**AI use:** [Disclosure](#ai-use-disclosure)
 
 Screenshots below document the original Sol Atlas build; historical branding in those captures is retained.
 
@@ -223,7 +223,7 @@ NASA map products are obtained through the USGS Astrogeology public `asc-pds-ser
 | Crater terrain, slope, contours | MRO CTX 20 m DEM (JPL) | 1024 × 1164 height grid; slope from the full 20 m DEM |
 | Marswalk zone imagery | MRO HiRISE 25 cm TRN orthomosaic | 6 × 6 km cut, 4096² px (~1.5 m/px), seams flattened, tinted |
 | Marswalk zone terrain, slope, routes, profile | MRO HiRISE 1 m TRN DTM | 1024² height grid; slope at 2.9 m; A* route grid 512² |
-| Space weather at Mars (live) | NASA DONKI WSA-ENLIL simulations (api.nasa.gov) | Not stored. `src/lib/spaceweather.js` keeps the latest run per CME with a Mars entry in `impactList`; `netlify/functions/space-weather.mjs` holds the API key server-side |
+| Space weather at Mars (live) | NASA DONKI WSA-ENLIL simulations (api.nasa.gov) | Not stored. `src/lib/spaceweather.js` fetches the latest runs directly from NASA DONKI (DEMO_KEY) and keeps the latest forecast per CME with a Mars entry in `impactList` |
 | Perseverance traverse | Mars 2020 end-of-drive waypoints (NASA/JPL MMGIS) | 555 points (last fix of each sol), sol 0–2022, stored in `public/data/m20_traverse.json` by the `traverse` stage |
 
 ### Unused datasets and coverage limitations
@@ -405,31 +405,38 @@ Downloads are cached in `.cache/`, which is git-ignored. The `lite` stage writes
 
 ---
 
-## Deploy
+## Deploy to Render
 
-The site is set up for Netlify with [`netlify.toml`](netlify.toml): it builds with `npm run build` and publishes `dist/`.
+The site is configured for **[Render](https://render.com/)** using [`render.yaml`](render.yaml) as a high-performance **Static Site** (free hosting with global CDN, custom domains, and automatic SSL).
 
-**Netlify site:** `sol-atlas` → https://sol-atlas.netlify.app
+### Option 1: Deploy with Render Blueprint (Recommended)
 
-To publish from GitHub, with automatic redeploys on every push:
+1. Push your repository to GitHub (`main` branch).
+2. Go to the [Render Dashboard](https://dashboard.render.com).
+3. Click **New +** -> **Blueprint**.
+4. Connect your GitHub repository (`AeroAtlas`).
+5. Render will automatically detect `render.yaml` and configure the Static Site:
+   - **Type:** Static Site
+   - **Build Command:** `npm install && npm run build`
+   - **Publish Directory:** `dist`
+   - **Node Version:** `22` (defined via `.node-version` and `render.yaml`)
+6. Click **Apply**. Render will build and deploy your site to an active `*.onrender.com` URL.
 
-1. Open https://app.netlify.com/projects/sol-atlas.
-2. Go to **Project configuration → Build & deploy → Continuous deployment → Link repository**.
-3. Choose GitHub → `saracen66/the-sol-explorers`.
-4. Pick the branch to publish (`main` once the work is merged). Build settings are read from `netlify.toml`.
+### Option 2: Manual Static Site Setup on Render
 
-To deploy by hand from your own computer:
+1. Go to [Render Dashboard](https://dashboard.render.com) -> **New +** -> **Static Site**.
+2. Connect your GitHub repository.
+3. Configure the settings:
+   - **Name:** `aeroatlas` (or your chosen name)
+   - **Branch:** `main`
+   - **Root Directory:** (leave blank if repo root, or `AeroAtlas` if in a subfolder)
+   - **Build Command:** `npm install && npm run build`
+   - **Publish Directory:** `dist`
+4. Under **Redirects/Rewrites**:
+   - Add a rewrite rule: Source `/*` -> Destination `/index.html` (Action: `Rewrite`).
+5. Click **Create Static Site**.
 
-```bash
-npm install -g netlify-cli
-netlify login
-netlify link --id 3cde891d-2654-4f7a-b31d-30e5ad235ca8
-netlify deploy --build --prod
-```
-
-`dist/` also works on GitHub Pages or any other static host, because all paths are relative.
-
-**Live space weather and the NASA API key.** [`netlify/functions/space-weather.mjs`](netlify/functions/space-weather.mjs) serves `/api/space-weather`: it fetches NASA DONKI with a key kept on the server, and Netlify's CDN caches the reply for 30 minutes, so every visitor shares a few NASA requests. To give it a key (free, instant: https://api.nasa.gov → *Generate API Key*), add `NASA_API_KEY` under **Project configuration → Environment variables** in Netlify and redeploy. Without a key it uses NASA's `DEMO_KEY`, which on 13 Nov 2026 allowed only 10 requests an hour per IP address. On other hosts, or locally, the browser calls `api.nasa.gov` directly with `DEMO_KEY`. Never put a real key in the front-end code: the repository and the built JavaScript are public.
+`dist/` also works on GitHub Pages or any other static host, because all asset and data paths are relative.
 
 ---
 
@@ -437,8 +444,8 @@ netlify deploy --build --prod
 
 ```
 index.html              HUD skeleton (panels, loader, overlays)
-netlify.toml            Netlify build + cache headers
-netlify/functions/      space-weather.mjs: /api/space-weather, NASA DONKI with the key kept server-side
+render.yaml             Render Blueprint configuration (build, publish, headers, SPA rewrite)
+.node-version           Node.js runtime version for Render (Node 22)
 vite.config.js          Vite config (relative base path)
 src/
   main.js               app: level transitions (orbit ⇄ crater ⇄ zone), input, render loop
