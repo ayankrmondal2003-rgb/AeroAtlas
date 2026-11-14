@@ -6,7 +6,7 @@ services:
     name: aeroatlas
     runtime: static
     # Command to build the static assets quickly without wasting free build minutes
-    buildCommand: npm install --no-audit --prefer-offline && npm run build
+    buildCommand: npm install && chmod -R +x node_modules/.bin && npm run build
     staticPublishPath: ./dist
     # Disable PR previews to conserve free tier monthly build minutes (500 min/month limit)
     pullRequestPreviewsEnabled: false
