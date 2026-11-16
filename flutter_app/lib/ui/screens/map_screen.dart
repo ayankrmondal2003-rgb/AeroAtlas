@@ -21,32 +21,38 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(AppTheme.background)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            setState(() => _isLoading = true);
-          },
-          onPageFinished: (String url) {
-            setState(() => _isLoading = false);
-          },
-          onWebResourceError: (WebResourceError error) {
-            debugPrint('WebView Error: ${error.description}');
-          },
-        ),
-      );
+    _controller = WebViewController();
 
     if (!kIsWeb) {
-      _controller.addJavaScriptChannel(
-        'AeroAtlasFlutter',
-        onMessageReceived: (JavaScriptMessage message) {
-          setState(() {
-            _currentView = message.message;
-          });
-        },
-      );
+      _controller
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(AppTheme.background)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageStarted: (String url) {
+              if (mounted) setState(() => _isLoading = true);
+            },
+            onPageFinished: (String url) {
+              if (mounted) setState(() => _isLoading = false);
+            },
+            onWebResourceError: (WebResourceError error) {
+              debugPrint('WebView Error: ${error.description}');
+            },
+          ),
+        )
+        ..addJavaScriptChannel(
+          'AeroAtlasFlutter',
+          onMessageReceived: (JavaScriptMessage message) {
+            if (mounted) {
+              setState(() {
+                _currentView = message.message;
+              });
+            }
+          },
+        );
+    } else {
+      // On web browsers, iframe handles JavaScript and loading directly
+      _isLoading = false;
     }
 
     _controller.loadRequest(Uri.parse(AppConstants.webAppUrl));
@@ -156,7 +162,7 @@ class _MapScreenState extends State<MapScreen> {
                     label: 'Reload',
                     isActive: false,
                     onTap: () {
-                      _controller.reload();
+                      _controller.loadRequest(Uri.parse(AppConstants.webAppUrl));
                     },
                   ),
                 ],
