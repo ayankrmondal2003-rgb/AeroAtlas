@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -35,20 +36,26 @@ class _MapScreenState extends State<MapScreen> {
             debugPrint('WebView Error: ${error.description}');
           },
         ),
-      )
-      ..addJavaScriptChannel(
+      );
+
+    if (!kIsWeb) {
+      _controller.addJavaScriptChannel(
         'AeroAtlasFlutter',
         onMessageReceived: (JavaScriptMessage message) {
           setState(() {
             _currentView = message.message;
           });
         },
-      )
-      ..loadRequest(Uri.parse(AppConstants.webAppUrl));
+      );
+    }
+
+    _controller.loadRequest(Uri.parse(AppConstants.webAppUrl));
   }
 
   void _sendScript(String script) {
-    _controller.runJavaScript(script);
+    if (!kIsWeb) {
+      _controller.runJavaScript(script);
+    }
   }
 
   @override
