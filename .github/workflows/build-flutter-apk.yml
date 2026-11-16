@@ -1,0 +1,49 @@
+name: Build Flutter Android APK
+
+on:
+  push:
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/build-flutter-apk.yml'
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-flutter:
+    name: Build Flutter Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get Flutter Packages
+        run: |
+          cd flutter_app
+          flutter pub get
+
+      - name: Build Flutter APK
+        run: |
+          cd flutter_app
+          flutter build apk --debug
+
+      - name: Upload Flutter APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AeroAtlas-Flutter-APK
+          path: flutter_app/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 30
